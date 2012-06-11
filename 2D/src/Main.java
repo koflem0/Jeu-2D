@@ -1861,7 +1861,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			switch (skill) {
 			case Smash:
 			case ATTACK:
-				
+				//patate
 				attackL[0] = newImage("/attackL.png"); attackL[1] = newImage("/attackL2.png"); attackL[2] = newImage("/attackL3.png"); attackL[3] = newImage("/attackL4.png");
 				left.addScene(attackL[0], 100);
 				left.addScene(attackL[1], 100);
