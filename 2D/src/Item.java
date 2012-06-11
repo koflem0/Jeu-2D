@@ -61,9 +61,13 @@ public class Item implements Serializable{
 		int stat;
 		int statMax = 8;
 		if(i == 0 && slot!=RING && slot!=AMULET){
-			stat = rand.nextInt(statMax+4);
-			if(stat >= statMax) enhancedD = rand.nextInt(15) + 11;
-			else generateStat(stat);
+			stat = rand.nextInt(4);
+			if(stat < 1) enhancedD = rand.nextInt(15) + 11;
+			else {
+				do{stat = rand.nextInt(statMax);}
+				while(stats[stat] != 0 || (stat==Main.MASTERY && slot != WEAPON));
+				generateStat(stat);
+			}
 		} else {
 			do{stat = rand.nextInt(statMax);}
 			while(stats[stat] != 0 || (stat==Main.MASTERY && slot != WEAPON));
@@ -78,9 +82,9 @@ public class Item implements Serializable{
 		case Main.CRIT: stats[stat] = (int)((rand.nextDouble()+1)*Math.pow(1.05, level)); break;
 		case Main.CRITDMG: stats[stat] = (int)((rand.nextDouble()*5+5)*Math.pow(1.08, level)); break;
 		
-		case Main.INT:
-		case Main.STR:
-		case Main.DEX:
+		case Main.SPIRIT:
+		case Main.POW:
+		case Main.AGI:
 		case Main.VIT:
 			stats[stat] =(int) ((rand.nextDouble()*2.5 + 1.5)*Math.pow(1.1,level)); break;
 		case Main.ALLSTATS:

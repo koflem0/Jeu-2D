@@ -19,9 +19,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	private static final long serialVersionUID = 1L;
 	public static final int LEFT = -1, RIGHT = 1;
-	public static final int STR = 0, DEX = 1, INT = 2, VIT = 3, CRIT = 4,
+	public static final int POW = 0, AGI = 1, SPIRIT = 2, VIT = 3, CRIT = 4,
 			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 8, WATK = 9;
-	public static final int MAGE = INT, FIGHTER = STR, ARCHER = DEX;
+	public static final int MAGE = 2, FIGHTER = 0, ARCHER = 1;
 	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2;
 
 	public static void main(String[] args) {
@@ -551,17 +551,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if(i != ALLSTATS){
 			String info = "";
 			switch (i) {
-			case INT:
-				info = "INT : ";
+			case SPIRIT:
+				info = "Spirit : ";
 				break;
-			case STR:
-				info = "STR : ";
+			case POW:
+				info = "Power : ";
 				break;
-			case DEX:
-				info = "DEX : ";
+			case AGI:
+				info = "Agility : ";
 				break;
 			case VIT:
-				info = "VIT : ";
+				info = "Vitality : ";
 				break;
 			case CRIT:
 				info = "Crit chance : ";
@@ -630,9 +630,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 			g.drawString(statMenu.statButtons[i].getInfo(),
 					statMenu.statButtons[i].getTextPosition().x + 50,
 					statMenu.statButtons[i].getTextPosition().y - 20);
-			g.drawString(statMenu.statButtons[i].getTotal(),
-					statMenu.statButtons[i].getTextPosition().x + 50,
-					statMenu.statButtons[i].getTextPosition().y + 5);
+			//g.drawString(statMenu.statButtons[i].getTotal(),
+			//		statMenu.statButtons[i].getTextPosition().x + 50,
+			//		statMenu.statButtons[i].getTextPosition().y + 5);
 			g.drawString(Integer.toString(c.atts[i]),
 					statMenu.statButtons[i].getTextPosition().x + 8,
 					statMenu.statButtons[i].getTextPosition().y - 25);
@@ -690,12 +690,21 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private void drawUI(Graphics2D g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, S.getHeight() - 55, S.getWidth(), 55);
-		g.setColor(Color.RED);
+		
+		if(c.stats.classe == FIGHTER)
+			g.setColor(Color.GRAY);
+			else
+			g.setColor(Color.RED);
 		g.fill(new Rectangle(100, S.getHeight() - 50, 400, 20));
 		g.fill(new Rectangle(100, S.getHeight() - 25, 400, 20));
 		g.setColor(Color.GREEN);
 		g.fill(lifeBar());
+		if(c.stats.classe == MAGE)
 		g.setColor(Color.BLUE);
+		else if(c.stats.classe == ARCHER)
+		g.setColor(Color.ORANGE);
+		else if(c.stats.classe == FIGHTER)
+		g.setColor(Color.RED);
 		g.fill(manaBar());
 		g.setColor(Color.WHITE);
 		g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -1753,7 +1762,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public void skillStats() {
 			switch (skill) {
 			case ATTACK:
-				manaUsed = 0;
+				manaUsed = -5 * (c.stats.atts[SPIRIT]+100)/100;
 				dmgMult[0] = 1;
 				maxEnemiesHit = 1;
 				KBSpeed[0] = 0.18f;
@@ -1761,23 +1770,23 @@ public class Main extends Core implements KeyListener, MouseListener,
 				hitTime[0] = 200;
 				break;
 			case Smash:
-				manaUsed = 5;
-				dmgMult[0] = 0.8f + 0.05f * c.stats.skillLvls[skill];
+				manaUsed = 15;
+				dmgMult[0] = 1.1f + 0.12f * c.stats.skillLvls[skill];
 				maxEnemiesHit = 3 + (int)(c.stats.skillLvls[skill]*0.4f);
 				KBSpeed[0] = 0.18f;
 				skillTime = 400;
 				hitTime[0] = 200;
 				break;
 			case MultiHit:
-				manaUsed = 10;
-				dmgMult[0] = dmgMult[1] = dmgMult[2] = 0.58f + 0.05f * c.stats.skillLvls[skill];
+				manaUsed = -2 * (c.stats.atts[SPIRIT]+100)/100;
+				dmgMult[0] = dmgMult[1] = dmgMult[2] = 0.44f + 0.04f * c.stats.skillLvls[skill];
 				maxEnemiesHit = 1;
 				KBSpeed[0] = KBSpeed[1] = 0.05f;
 				KBSpeed[2] = 0.10f;
-				skillTime = 600;
-				hitTime[0] = 170;
-				hitTime[1] = 340;
-				hitTime[2] = 510;
+				skillTime = 500;
+				hitTime[0] = 140;
+				hitTime[1] = 270;
+				hitTime[2] = 400;
 				break;
 			case Arrow:
 				manaUsed = 0;
@@ -1788,17 +1797,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 				skillTime = 400;
 				break;
 			case DoubleArrow:
-				manaUsed = 8;
+				manaUsed = 12;
 				dmgMult[0] = dmgMult[1] = 0.74f + 0.06f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.05f;
 				KBSpeed[1] = 0.10f;
 				maxEnemiesHit = 1;
 				skillTime = 500;
 				hitTime[0] = 150;
-				hitTime[1] = 250;
+				hitTime[1] = 300;
 				break;
 			case ExplosiveArrow:
-				manaUsed = 10;
+				manaUsed = 15;
 				dmgMult[0] = 0.84f + 0.06f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
 				maxEnemiesHit = 3 + (int)(c.stats.skillLvls[skill]*0.4f);
@@ -1822,7 +1831,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				skillTime = 400;
 				break;
 			case Explosion:
-				manaUsed = 14;
+				manaUsed = 15;
 				dmgMult[0] = 1.13f + 0.07f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
 				maxEnemiesHit = 4+(int)(c.stats.skillLvls[skill] * 0.5f);
@@ -1860,8 +1869,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 			Image[] attackL = new Image[10], attackR = new Image[10];
 			switch (skill) {
 			case Smash:
+				attackL[0] = newImage("/smashL.png"); attackL[1] = newImage("/smashL2.png"); attackL[2] = newImage("/smashL3.png"); attackL[3] = newImage("/smashL4.png");
+				left.addScene(attackL[0], 100);
+				left.addScene(attackL[1], 100);
+				left.addScene(attackL[2], 100);
+				left.addScene(attackL[3], 150);
+				
+				attackR[0] = newImage("/smashR.png"); attackR[1] = newImage("/smashR2.png"); attackR[2] = newImage("/smashR3.png"); attackR[3] = newImage("/smashR4.png");
+				right.addScene(attackR[0], 100);
+				right.addScene(attackR[1], 100);
+				right.addScene(attackR[2], 100);
+				right.addScene(attackR[3], 150);
+				
+				break;
 			case ATTACK:
-				//patate
 				attackL[0] = newImage("/attackL.png"); attackL[1] = newImage("/attackL2.png"); attackL[2] = newImage("/attackL3.png"); attackL[3] = newImage("/attackL4.png");
 				left.addScene(attackL[0], 100);
 				left.addScene(attackL[1], 100);
@@ -1878,16 +1899,16 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case MultiHit:
 				
 				attackL[0] = newImage("/attackL.png"); attackL[1] = newImage("/attackL2.png"); attackL[2] = newImage("/attackL3.png"); attackL[3] = newImage("/attackL4.png");
-				left.addScene(attackL[0], 50);
-				left.addScene(attackL[1], 50);
-				left.addScene(attackL[2], 50);
-				left.addScene(attackL[3], 50);
+				left.addScene(attackL[0], 42);
+				left.addScene(attackL[1], 42);
+				left.addScene(attackL[2], 42);
+				left.addScene(attackL[3], 42);
 				
 				attackR[0] = newImage("/attackR.png"); attackR[1] = newImage("/attackR2.png"); attackR[2] = newImage("/attackR3.png"); attackR[3] = newImage("/attackR4.png");
-				right.addScene(attackR[0], 50);
-				right.addScene(attackR[1], 50);
-				right.addScene(attackR[2], 50);
-				right.addScene(attackR[3], 50);
+				right.addScene(attackR[0], 42);
+				right.addScene(attackR[1], 42);
+				right.addScene(attackR[2], 42);
+				right.addScene(attackR[3], 42);
 				
 				break;
 			case DoubleArrow:
@@ -1953,12 +1974,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 						skillProjectiles[i] = null;
 						skillProjectiles[i] = new Projectile(
 								newAnimation(skill), this, i);
-						skillProjectiles[i].setX(getX() + getWidth() / 2);
 						skillProjectiles[i].setY(getY() + getHeight() / 2);
-						if (cLeft)
+						if (cLeft){
+							skillProjectiles[i].setX(getX() + getWidth() / 3 - skillProjectiles[i].getWidth());
 							skillProjectiles[i].setXVelocity(-1);
-						else
+						} else {
+							skillProjectiles[i].setX(getX() + 2 * getWidth() / 3);
 							skillProjectiles[i].setXVelocity(1);
+						}
 
 						Point target = getTarget(getAimArea());
 						if (target == null)
@@ -2104,9 +2127,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// active le sort si le personnage à assez de mana
 		public void activate() {
 			left.start(); right.start();
-			if (manaUsed <= c.getMana()) {
+			
+			int mana = manaUsed;
+			if(mana < 0) mana = 0;
+			
+			if (mana <= c.getMana()) {
 				if (!active) {
-					c.setMana(c.getMana() - manaUsed);
+					c.setMana(c.getMana() - mana);
 					cLeft = c.isFacingLeft();
 					totalTime = 0;
 					for (int i = 0; i < hit.length; i++)
@@ -2122,6 +2149,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 							- 250, c.getY() - 80), a, 500, true);
 					add(skillEffect);
 					}
+				}
+			} else {
+				switch(c.stats.classe){
+				case FIGHTER : skills[ATTACK].activate(); break;
+				case MAGE : skills[EnergyBall].activate(); break;
+				case ARCHER : skills[Arrow].activate();break;
 				}
 			}
 		}
@@ -2139,6 +2172,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 									c.getDamage(monsters[i],
 										getDmgMult(hit)),
 										getKBSpeed(hit));
+							if(manaUsed < 0) { 
+								if(c.getMana()-manaUsed > c.maxMana) c.setMana(c.maxMana);
+								else
+								c.setMana(c.getMana()-manaUsed);
+								}
 							hits++;
 						}
 			}
@@ -2256,6 +2294,16 @@ public class Main extends Core implements KeyListener, MouseListener,
 			}
 		}
 
+		public String getResourceName(){
+			String info = "";
+			switch(c.stats.classe){
+			case FIGHTER : info+="fury";break;
+			case MAGE : info+="mana";break;
+			case ARCHER : info+="precision";break; 
+			}
+			return info;
+		}
+		
 		public void setClimbing(int i){
 			if(canMove)
 			if(onLadder)setYVelocity(-i*0.4f);
@@ -2275,9 +2323,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		public float getStat(int stat) {
 			switch (stat) {
-			case INT:
-			case STR:
-			case DEX:
+			case SPIRIT:
+			case POW:
+			case AGI:
 			case VIT:
 				return atts[stat];
 			case CRITDMG:
@@ -2305,7 +2353,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			loadStats();
 			if (stat == VIT)
 				stats.life = maxLife;
-			if (stat == INT)
+			if (stat == SPIRIT)
 				stats.mana = maxMana;
 		}
 
@@ -2323,17 +2371,21 @@ public class Main extends Core implements KeyListener, MouseListener,
 						atts[i] += passive.getSkillStat(i);
 			}
 
-			defense = stats.lvl + atts[VIT] - 4 + stats.inventory.getDefense();
-			maxLife = 5 * stats.lvl + 5 * atts[VIT] + 75;
+			defense = stats.lvl + stats.inventory.getDefense();
+						
+			maxLife = (5 * stats.lvl + 95)* (atts[VIT]+100)/100;
 			if (stats.life > maxLife)
 				stats.life = maxLife;
-			maxMana = 5 * stats.lvl + 5 * atts[INT] + 75;
+			
+			if(stats.classe == MAGE)maxMana = 5 * (stats.lvl-1); else maxMana = 0;
+			maxMana += 100;
+			maxMana = maxMana * (atts[SPIRIT]+100)/100;
 			if (stats.mana > maxMana)
 				stats.mana = maxMana;
 			
-			critChance = (float) (5 + 0.2 * atts[DEX]) + stats.inventory.getStat(CRIT);
+			critChance = 5 + stats.inventory.getStat(CRIT);
 			
-			critDamage = 50 + 2 * atts[STR] + stats.inventory.getStat(CRITDMG);
+			critDamage = 50 + stats.inventory.getStat(CRITDMG);
 			
 			wATK = stats.inventory.getDamage();
 			if (wATK == 0) wATK = 2;
@@ -2510,17 +2562,29 @@ public class Main extends Core implements KeyListener, MouseListener,
 				setXVelocity(dir * 0.38f);
 			if (usingSkill && getYVelocity() == 0)
 				setXVelocity(0);
-
+			
+			if(stats.classe == MAGE){
 			if (stats.mana < maxMana)
 				manaRegen += timePassed;
-			if (manaRegen >= ((100000 + maxMana*100) / maxMana)) {
-				stats.mana++;
-				manaRegen = 0;
+				if (manaRegen >= ((1000 - stats.lvl*5) *100/(100+atts[SPIRIT]))) {
+					stats.mana++;
+					manaRegen = 0;
+				}
+			} else if(stats.classe == ARCHER){
+				if(stats.mana < maxMana){
+					manaRegen += timePassed;
+					if((c.getXVelocity()==0 && c.getYVelocity()==0) || !c.canMove())
+						manaRegen += 5*timePassed;
+				}
+				if(manaRegen >= (1200 * 100/(100+atts[SPIRIT]))){
+					stats.mana++;
+					manaRegen = 0;
+				}
 			}
 
 			if (stats.life < maxLife)
 				lifeRegen += timePassed;
-			if (lifeRegen >= ((200000 + maxLife*200) / maxLife) ) {
+			if (lifeRegen >= (2000 * 100/(100+atts[VIT]))) {
 				stats.life++;
 				lifeRegen = 0;
 			}
@@ -2557,10 +2621,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// fait des dégats au personnage
 		public void damageChar(int dmg) {
-			if(isAlive()){
-			if (!isInvincible())
+			if(isAlive())
+			if (!isInvincible()){
 				if (dmg > 0) {
 					stats.life -= dmg;
+					if(stats.classe == FIGHTER)
+					if((stats.mana += 3 * (100 + atts[SPIRIT])/100) > maxMana) stats.mana = maxMana;
 				}
 			if (stats.life <= 0){
 				stats.life = 0;
@@ -2590,9 +2656,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// retourne les dégats que le personnage fait à un certain monstre
 		public int getDamage(Monster m, float dmgMult) {
 			Random rand = new Random();
+			if(m.avoid > rand.nextInt(100)+atts[AGI]) return 0;
 			int dmast = rand.nextInt(100 - mastery) + mastery;
 
-			float dmg = (((wATK * (atts[stats.classe] * 2 + 100) / 100) * dmgMult));
+			float dmg = (((wATK * (atts[0] + 100) / 100) * dmgMult));
 			dmg = dmg * dmast / 100;
 			dmg = (float) (dmg * (1 - m.getDefense()
 					/ (m.getDefense() + 22 * Math.pow(1.1, stats.lvl))));
@@ -2607,7 +2674,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public int getMinDamage() {
-			float dmg = ((wATK * (atts[stats.classe] * 2 + 100) / 100));
+			float dmg = ((wATK * (atts[0] + 100) / 100));
 			dmg = dmg * mastery / 100;
 			if (dmg < 1)
 				dmg = 1;
@@ -2615,7 +2682,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public int getMaxDamage() {
-			return ((wATK * (atts[stats.classe] * 2 + 100) / 100));
+			return ((wATK * (atts[0] + 100) / 100));
 		}
 
 		// retourne les raccourcis clavier des sorts
@@ -2637,7 +2704,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		private long cantMoveTime;
 		private int atk, def, mastery, life, maxLife, exp, lvl,
-				dropchance = 13, rarechance = 8, dropamount = 1;
+				dropchance = 13, rarechance = 8, dropamount = 1, avoid;
 		private float spd;
 		private boolean facingLeft = true, canMove = true, alive = false;
 		private Image[] monstreD = new Image[8],monstreG = new Image[5];
@@ -2651,40 +2718,43 @@ public class Main extends Core implements KeyListener, MouseListener,
 			getAnimations(i);
 			switch (i) {
 			case COBRA:
-				atk = 12;
+				atk = 11;
 				def = 2;
 				mastery = 50;
 				spd = -0.240f;
-				maxLife = 15;
+				maxLife = 13;
 				timer = 12000;
 				exp = 3;
 				lvl = 1;
+				avoid = 0;
 				break;
 			case BIGCOBRA:
-				atk = 28;
+				atk = 22;
 				def = 15;
 				mastery = 70;
 				spd = -0.35f;
-				maxLife = 100;
+				maxLife = 70;
 				timer = 30000;
 				exp = 14;
 				lvl = 4;
 				dropchance = 30;
 				rarechance = 14;
 				dropamount = 2;
+				avoid = 10;
 				break;
 			case COC:
-				atk = 36;
+				atk = 30;
 				def = 35;
 				mastery = 70;
 				spd = -0.45f;
-				maxLife = 270;
+				maxLife = 170;
 				timer = 24000;
 				exp = 23;
 				lvl = 7;
 				dropchance = 28;
 				dropamount = 2;
 				rarechance = 13;
+				avoid = 20;
 				break;
 			}
 			this.spawnPoint = spawn;
@@ -2771,7 +2841,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// endommage le monstre et le fait reculer
 		public void damage(int dmg, float speed) {
-
+			
 			boolean crit = false;
 			Random rand = new Random();
 			if ((rand.nextInt(100) + 1) < c.getCritChance()) {
@@ -2781,10 +2851,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 			if (dmg > 0) {
 				life -= dmg;
-			}
 			if (life <= 0)
 				die();
 			else if(hitSound != null) hitSound.start();
+			}
 			boolean hit = false;
 
 			for (int j = 0; j < damage.length && hit == false; j++) {
@@ -2796,13 +2866,15 @@ public class Main extends Core implements KeyListener, MouseListener,
 					hit = true;
 				}
 			}
-
+			
+			if(dmg > maxLife / 50 && canMove){
 			canMove = false;
-			cantMoveTime = (long) (100 + speed * 1100);
+			cantMoveTime = (long) (105 + speed * 1100);
 			setYVelocity(-(speed * 3));
 			if ((c.getX() + c.getWidth() / 2) > (getX() + getWidth() / 2))
 				speed = -speed;
 			setXVelocity(speed);
+			}
 		}
 
 		// fais mourir le monstre
@@ -2819,9 +2891,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 		private void drop() {
 
 			Random rand = new Random();
-			int rarity = rand.nextInt(100) + 1;
+			int rarity = rand.nextInt(100);
 
-			if ((rand.nextInt(100) + 1) < dropchance) {
+			if ((rand.nextInt(100)) < dropchance) {
 
 				if (rarity < rarechance)
 					rarity = Item.RARE;
@@ -3281,21 +3353,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 			textPosition = new Point(position.x + 12, position.y + 40);
 			this.stat = stat;
 			switch (stat) {
-			case INT:
-				text = "INT";
-				info = "increases mana +5 and spell damage +2%";
+			case SPIRIT:
+				text = "SPI";
 				break;
-			case STR:
-				text = "STR";
-				info = "increases melee damage +2% and critical damage +2%";
+			case POW:
+				text = "POW";
 				break;
-			case DEX:
-				text = "DEX";
-				info = "increases ranged damage +2% and critical chance +0.2%";
+			case AGI:
+				text = "AGI";
 				break;
 			case VIT:
 				text = "VIT";
-				info = "increases hp +5  and defense +1";
 				break;
 			}
 		}
@@ -3313,27 +3381,21 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public String getInfo() {
-			return info;
-		}
-
-		public String getTotal() {
 			switch (stat) {
-			case INT:
-				return "Total : " + c.maxMana + " mana and " + c.atts[INT] * 2
-						+ "% magic damage";
-			case DEX:
-				return "Total : "
-						+ new DecimalFormat("#.#").format(c.getCritChance())
-						+ "% crit chance and " + c.atts[DEX] * 2
-						+ "% ranged damage";
-			case STR:
-				return "Total : " + c.getCritDamage() + "% crit damage and "
-						+ c.atts[STR] * 2 + "% melee damage";
+			case SPIRIT:
+				info = "Spirit increases total " + c.getResourceName() + " and " + c.getResourceName()+" regen by 1%";
+				break;
+			case POW:
+				info = "Power increases all damage by 1%";
+				break;
+			case AGI:
+				info = "Agility increases your chance to hit by 1%";
+				break;
 			case VIT:
-				return "Total : " + c.maxLife + " life and " + c.defense
-						+ " defense";
+				info = "Vitality increases your hp and healing/regen by 1%";
+				break;
 			}
-			return "";
+			return info;
 		}
 
 		public void activate() {
@@ -3410,9 +3472,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 					break;
 				}
 				info += "lvl " + saveStats.lvl;
-				info += ", " + saveStats.atts[STR] + " STR";
-				info += ", " + saveStats.atts[DEX] + " DEX";
-				info += ", " + saveStats.atts[INT] + " INT";
+				info += ", " + saveStats.atts[POW] + " POW";
+				info += ", " + saveStats.atts[AGI] + " AGI";
+				info += ", " + saveStats.atts[SPIRIT] + " SPI";
 				info += ", " + saveStats.atts[VIT] + " VIT";
 				return info;
 			} else

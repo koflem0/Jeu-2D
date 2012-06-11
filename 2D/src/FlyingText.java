@@ -26,8 +26,12 @@ public class FlyingText extends Sprite {
 	 
 	 public FlyingText(String t, Main.Monster m, boolean crit){
 		 if(crit) color = Color.RED;
-		 active = true;
 		 text = t;
+		 if(t == "0") {
+			 color = Color.WHITE;
+			 text = "miss";
+		 }
+		 active = true;
 		 this.m = m;
 		 setX(m.getX() + m.getWidth()/3);
 		 setY(m.getY() + m.getHeight()/2 - moveUp);
