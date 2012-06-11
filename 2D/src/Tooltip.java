@@ -37,10 +37,10 @@ public class Tooltip {
 				stats[number]+=item.getStat(i);
 				switch(i){
 				case Main.ALLSTATS: stats[number]+=" to all stats"; break;
-				case Main.INT: stats[number]+=" INT"; break;
-				case Main.STR: stats[number]+=" STR"; break;
-				case Main.DEX: stats[number]+=" DEX"; break;
-				case Main.VIT: stats[number]+=" VIT"; break;
+				case Main.SPIRIT: stats[number]+=" Spirit"; break;
+				case Main.POW: stats[number]+=" Power"; break;
+				case Main.AGI: stats[number]+=" Agility"; break;
+				case Main.VIT: stats[number]+=" Vitality"; break;
 				case Main.CRITDMG: stats[number]+="% Crit damage"; break;
 				case Main.CRIT: stats[number]+="% Crit chance"; break;
 				case Main.MASTERY: stats[number]+=" Mastery"; break;

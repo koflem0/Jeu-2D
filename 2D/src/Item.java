@@ -82,9 +82,9 @@ public class Item implements Serializable{
 		case Main.CRIT: stats[stat] = (int)((rand.nextDouble()+1)*Math.pow(1.05, level)); break;
 		case Main.CRITDMG: stats[stat] = (int)((rand.nextDouble()*5+5)*Math.pow(1.08, level)); break;
 		
-		case Main.INT:
-		case Main.STR:
-		case Main.DEX:
+		case Main.SPIRIT:
+		case Main.POW:
+		case Main.AGI:
 		case Main.VIT:
 			stats[stat] =(int) ((rand.nextDouble()*2.5 + 1.5)*Math.pow(1.1,level)); break;
 		case Main.ALLSTATS:
