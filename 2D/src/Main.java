@@ -22,7 +22,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 	public static final int POW = 0, AGI = 1, SPIRIT = 2, VIT = 3, CRIT = 4,
 			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 8, WATK = 9;
 	public static final int MAGE = 2, FIGHTER = 0, ARCHER = 1;
-	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2;
+	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2, VERYBIGCOBRA = 3;
 
 	public static void main(String[] args) {
 		Main m = new Main();
@@ -2729,32 +2729,45 @@ public class Main extends Core implements KeyListener, MouseListener,
 				avoid = 0;
 				break;
 			case BIGCOBRA:
-				atk = 22;
-				def = 15;
+				atk = 20;
+				def = 7;
 				mastery = 70;
 				spd = -0.35f;
+				maxLife = 32;
+				timer = 30000;
+				exp = 7;
+				lvl = 2;
+				dropchance = 20;
+				dropamount = 1;
+				avoid = 9;
+				break;
+			case VERYBIGCOBRA:
+				atk = 28;
+				def = 9;
+				mastery = 70;
+				spd = -0.40f;
 				maxLife = 70;
 				timer = 30000;
-				exp = 14;
-				lvl = 4;
-				dropchance = 30;
-				rarechance = 14;
-				dropamount = 2;
-				avoid = 10;
+				exp = 12;
+				lvl = 3;
+				rarechance = 15;
+				dropchance = 25;
+				dropamount = 1;
+				avoid = 11;
 				break;
 			case COC:
-				atk = 30;
-				def = 35;
+				atk = 25;
+				def = 40;
 				mastery = 70;
 				spd = -0.45f;
 				maxLife = 170;
 				timer = 24000;
 				exp = 23;
-				lvl = 7;
+				lvl = 4;
 				dropchance = 28;
-				dropamount = 2;
+				dropamount = 1;
 				rarechance = 13;
-				avoid = 20;
+				avoid = 12;
 				break;
 			}
 			this.spawnPoint = spawn;
@@ -2927,6 +2940,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			switch (i) {
 			case COBRA:
 			case BIGCOBRA:
+			case VERYBIGCOBRA:
 				right.addScene(monstreD[1], 220);
 				right.addScene(monstreD[2], 220);
 				left.addScene(monstreG[1], 220);
@@ -2981,6 +2995,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				monstreD[2] = newImage("/bigcobra2D.png");
 				monstreG[1] = newImage("/bigcobra1G.png");
 				monstreG[2] = newImage("/bigcobra2G.png");
+				break;
+			case VERYBIGCOBRA:
+				monstreD[1] = newImage("/verybigcobra1D.png");
+				monstreD[2] = newImage("/verybigcobra2D.png");
+				monstreG[1] = newImage("/verybigcobra1G.png");
+				monstreG[2] = newImage("/verybigcobra2G.png");
 				break;
 			case COC:
 				monstreD[1] = newImage("/coc1D.png");
@@ -3171,11 +3191,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				background = newImage("/map1.jpg");
 				monsters[0] = new Monster(COBRA, new Point(850,540-60));
 				monsters[1] = new Monster(COBRA, new Point(1100,540-60));
-				monsters[2] = new Monster(COBRA, new Point(1750,540-60));
+				monsters[2] = new Monster(BIGCOBRA, new Point(1750,540-60));
 				monsters[3] = new Monster(COBRA, new Point(2000,540-60));
 				monsters[4] = new Monster(BIGCOBRA, new Point(2600,Ylimit-100));
 				monsters[5] = new Monster(BIGCOBRA, new Point(1600,Ylimit-100));
 				monsters[6] = new Monster(BIGCOBRA, new Point(400,Ylimit-100));
+				monsters[7] = new Monster(VERYBIGCOBRA, new Point(1800,Ylimit-100));
+				monsters[8] = new Monster(VERYBIGCOBRA, new Point(600,Ylimit-100));
 				break;
 			case 2:
 				Xlimit = 2000;
@@ -3203,9 +3225,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				platforms[10] = new Platform(1150,2436, 1333-1150);
 				
 				monsters[0] = new Monster(COC, new Point(600,Ylimit-100));
+				monsters[6] = new Monster(VERYBIGCOBRA, new Point(800,Ylimit-100));
+				monsters[7] = new Monster(BIGCOBRA, new Point(1000,Ylimit-100));
+				monsters[8] = new Monster(COBRA, new Point(1200,Ylimit-100));
+				monsters[9] = new Monster(COBRA, new Point(1400,Ylimit-100));
 				monsters[1] = new Monster(COC, new Point(800,3730));
 				monsters[2] = new Monster(COC, new Point(800, 3250));
-				monsters[3] = new Monster(BIGCOBRA, new Point(300, 3250));
+				monsters[3] = new Monster(VERYBIGCOBRA, new Point(300, 3250));
 				monsters[4] = new Monster(BIGCOBRA, new Point(550, 3250));
 				monsters[5] = new Monster(COC, new Point(400, 2290));
 				
