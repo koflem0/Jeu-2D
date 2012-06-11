@@ -20,9 +20,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private static final long serialVersionUID = 1L;
 	public static final int LEFT = -1, RIGHT = 1;
 	public static final int POW = 0, AGI = 1, SPIRIT = 2, VIT = 3, CRIT = 4,
-			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 8, WATK = 9;
+			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 19, WATK = 20;
 	public static final int MAGE = 2, FIGHTER = 0, ARCHER = 1;
-	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2;
+	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2, VERYBIGCOBRA = 3;
 
 	public static void main(String[] args) {
 		Main m = new Main();
@@ -39,7 +39,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private Character c;
 	private Image bg, spotImage;
 	private Image[] itemIcons = new Image[8], equipIcons = new Image[8];
-	private Animation walkL, walkR, standL, standR, jumpR, jumpL;
+	private Animation walkL, walkR, standL, standR, jumpR, jumpL, climb, onLadder, sideClimb
+						, wizWalkL, wizWalkR, wizStandL, wizStandR, wizJumpL, wizJumpR;
 	private Platform[] platforms;
 	private Wall[] walls;
 	private Ladder[] ladders;
@@ -259,30 +260,53 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		bg = newImage("/forest1.png");
 		spotImage = newImage("/spot.png");
-		Image standingR = newImage("/walkright1.png");
-		Image jumpingR = newImage("/walkright2.png");
-		Image standingL = newImage("/walkleft1.png");
-		Image jumpingL = newImage("/walkleft2.png");
-
-		walkR = new Animation();
-		walkL = new Animation();
+		Image standingR = newImage("/walkright1.png"),wizStandingR = newImage("/bobwalkwizzardR1.png"),
+		jumpingR = newImage("/walkright2.png"), wizJumpingR = newImage("/bobwalkwizzardR2.png"),
+		standingL = newImage("/walkleft1.png"), wizStandingL = newImage("/bobwalkwizzardL1.png"),
+		jumpingL = newImage("/walkleft2.png"), wizJumpingL = newImage("/bobwalkwizzardL2.png"),
+		standingladder = newImage("/bobclimb1.png");
+		
+		walkR = new Animation(); wizWalkR = new Animation();
+		walkL = new Animation(); wizWalkL = new Animation();
+		climb = new Animation();
 		for (int i = 1; i <= 3; i++) {
-			walkR.addScene(newImage("/walkright" + i + ".png"), 150);
-			walkL.addScene(newImage("/walkleft" + i + ".png"), 150);
+			climb.addScene(newImage("/bobclimb" + i + ".png"), 120);
+			walkR.addScene(newImage("/walkright" + i + ".png"), 150); 
+			wizWalkR.addScene(newImage("/bobwalkwizzardR" + i + ".png"), 150);
+			walkL.addScene(newImage("/walkleft" + i + ".png"), 150); 
+			wizWalkL.addScene(newImage("/bobwalkwizzardL" + i + ".png"), 150);
 			if (i == 2) {
+				climb.addScene(newImage("/bobclimb" + 1 + ".png"), 120);
 				walkR.addScene(newImage("/walkright" + 1 + ".png"), 150);
+				wizWalkR.addScene(newImage("/bobwalkwizzardR" + 1 + ".png"), 150);
 				walkL.addScene(newImage("/walkleft" + 1 + ".png"), 150);
+				wizWalkL.addScene(newImage("/bobwalkwizzardL" + 1 + ".png"), 150);
 			}
 		}
+		
+		sideClimb = new Animation();
+		sideClimb.addScene(newImage("/bobclimbL1.png"), 160);
+		sideClimb.addScene(newImage("/bobclimbL2.png"), 160);
+		onLadder = new Animation();
+		onLadder.addScene(standingladder, 200);
 		standL = new Animation();
 		standL.addScene(standingL, 200);
 		standR = new Animation();
 		standR.addScene(standingR, 200);
+		wizStandL = new Animation();
+		wizStandL.addScene(wizStandingL,200);
+		wizStandR = new Animation();
+		wizStandR.addScene(wizStandingR,200);
 		jumpR = new Animation();
 		jumpR.addScene(jumpingR, 200);
 		jumpL = new Animation();
 		jumpL.addScene(jumpingL, 200);
-
+		wizJumpR = new Animation();
+		wizJumpR.addScene(wizJumpingR, 200);
+		wizJumpL = new Animation();
+		wizJumpL.addScene(wizJumpingL, 200);
+		
+		
 		itemIcons[Item.TORSO] = newImage("/torso.png");
 		itemIcons[Item.BOOTS] = newImage("/boots.png");
 		itemIcons[Item.RING] = newImage("/ring.png");
@@ -1078,19 +1102,33 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (c.getYVelocity() == 0) {
 			if (c.getXVelocity() > 0){
-				c.setAnimation(walkR);
+				if(c.onLadder) c.setAnimation(sideClimb);
+				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkR);
+				else c.setAnimation(walkR);
 			} else if (c.getXVelocity() < 0){
-				c.setAnimation(walkL);
+				if(c.onLadder) c.setAnimation(sideClimb);
+				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkL);
+				else c.setAnimation(walkL);
 			} else {
-				if (c.isFacingLeft())
-					c.setAnimation(standL);
-				else
-					c.setAnimation(standR);
+				if (c.isFacingLeft()){
+					if(c.stats.classe == MAGE) c.setAnimation(wizStandL);
+					else c.setAnimation(standL);
+				} else {
+					if(c.stats.classe == MAGE) c.setAnimation(wizStandR);
+					else c.setAnimation(standR);
+				}
+				if(c.onLadder) c.setAnimation(onLadder);
 			}
-		} else if (c.isFacingLeft())
-			c.setAnimation(jumpL);
-		else
-			c.setAnimation(jumpR);
+	
+			
+		} else if(c.onLadder)c.setAnimation(climb); 
+		else if (c.isFacingLeft()){
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpR);
+			else c.setAnimation(jumpL);
+		} else {
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpL);
+			else c.setAnimation(jumpR);
+		}
 
 		if (!new Rectangle(0, 0, map.getXLimit(), map.getYLimit()).contains(c
 				.getArea())) {
@@ -2195,7 +2233,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		public int skill;
 		private int[] statBonus = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0 };
+				0, 0, 0, 0, 0, 0, 0 };
 
 		public PassiveSkill(int i) {
 			skill = i;
@@ -2733,32 +2771,45 @@ public class Main extends Core implements KeyListener, MouseListener,
 				avoid = 0;
 				break;
 			case BIGCOBRA:
-				atk = 22;
-				def = 15;
+				atk = 20;
+				def = 7;
 				mastery = 70;
 				spd = -0.35f;
+				maxLife = 32;
+				timer = 30000;
+				exp = 7;
+				lvl = 2;
+				dropchance = 20;
+				dropamount = 1;
+				avoid = 9;
+				break;
+			case VERYBIGCOBRA:
+				atk = 28;
+				def = 9;
+				mastery = 70;
+				spd = -0.40f;
 				maxLife = 70;
 				timer = 30000;
-				exp = 14;
-				lvl = 4;
-				dropchance = 30;
-				rarechance = 14;
-				dropamount = 2;
-				avoid = 10;
+				exp = 12;
+				lvl = 3;
+				rarechance = 15;
+				dropchance = 25;
+				dropamount = 1;
+				avoid = 11;
 				break;
 			case COC:
-				atk = 30;
-				def = 35;
+				atk = 25;
+				def = 40;
 				mastery = 70;
 				spd = -0.45f;
 				maxLife = 170;
 				timer = 24000;
 				exp = 23;
-				lvl = 7;
+				lvl = 4;
 				dropchance = 28;
-				dropamount = 2;
+				dropamount = 1;
 				rarechance = 13;
-				avoid = 20;
+				avoid = 12;
 				break;
 			}
 			this.spawnPoint = spawn;
@@ -2931,6 +2982,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			switch (i) {
 			case COBRA:
 			case BIGCOBRA:
+			case VERYBIGCOBRA:
 				right.addScene(monstreD[1], 220);
 				right.addScene(monstreD[2], 220);
 				left.addScene(monstreG[1], 220);
@@ -2985,6 +3037,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				monstreD[2] = newImage("/bigcobra2D.png");
 				monstreG[1] = newImage("/bigcobra1G.png");
 				monstreG[2] = newImage("/bigcobra2G.png");
+				break;
+			case VERYBIGCOBRA:
+				monstreD[1] = newImage("/verybigcobra1D.png");
+				monstreD[2] = newImage("/verybigcobra2D.png");
+				monstreG[1] = newImage("/verybigcobra1G.png");
+				monstreG[2] = newImage("/verybigcobra2G.png");
 				break;
 			case COC:
 				monstreD[1] = newImage("/coc1D.png");
@@ -3170,16 +3228,18 @@ public class Main extends Core implements KeyListener, MouseListener,
 				platforms[3] = new Platform(2450,550,Xlimit-2450);
 				platforms[4] = new Platform(515,1455,775-515);
 				ladders[0] = new Ladder(0,platforms[0],460,1260);
-				spots[0] = new Spot(new Point(0,340), new Point(1500-105,525-200), 0, new Point(220,0));
+				spots[0] = new Spot(new Point(0,340), new Point(1500-125,525-200), 0, new Point(220,0));
 				spots[1] = new Spot(new Point(2450+450,550-200), new Point(5,5000-240),2,new Point(0,5000-910));
 				background = newImage("/map1.jpg");
 				monsters[0] = new Monster(COBRA, new Point(850,540-60));
 				monsters[1] = new Monster(COBRA, new Point(1100,540-60));
-				monsters[2] = new Monster(COBRA, new Point(1750,540-60));
+				monsters[2] = new Monster(BIGCOBRA, new Point(1750,540-60));
 				monsters[3] = new Monster(COBRA, new Point(2000,540-60));
 				monsters[4] = new Monster(BIGCOBRA, new Point(2600,Ylimit-100));
 				monsters[5] = new Monster(BIGCOBRA, new Point(1600,Ylimit-100));
 				monsters[6] = new Monster(BIGCOBRA, new Point(400,Ylimit-100));
+				monsters[7] = new Monster(VERYBIGCOBRA, new Point(1800,Ylimit-100));
+				monsters[8] = new Monster(VERYBIGCOBRA, new Point(600,Ylimit-100));
 				break;
 			case 2:
 				Xlimit = 2000;
@@ -3188,7 +3248,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spawnPoint = new Point(5,5000-240);
 				spawnCamera = new Point(0,5000-910);
 				
-				spots[0] = new Spot(new Point(0,5000-240), new Point(2450+450,550-200), 1, new Point(3000-1280,0));
+				spots[0] = new Spot(new Point(0,5000-240), new Point(2450+430,550-200), 1, new Point(3000-1280,0));
 				walls[4] = new Wall(0,Ylimit-40,Xlimit,40);
 				walls[5] = new Wall(1580,4012,2000-1580,4035-4012);
 				walls[6] = new Wall(103,2483,201-103,2658-2483);
@@ -3207,9 +3267,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				platforms[10] = new Platform(1150,2436, 1333-1150);
 				
 				monsters[0] = new Monster(COC, new Point(600,Ylimit-100));
+				monsters[6] = new Monster(VERYBIGCOBRA, new Point(800,Ylimit-100));
+				monsters[7] = new Monster(BIGCOBRA, new Point(1000,Ylimit-100));
+				monsters[8] = new Monster(COBRA, new Point(1200,Ylimit-100));
+				monsters[9] = new Monster(COBRA, new Point(1400,Ylimit-100));
 				monsters[1] = new Monster(COC, new Point(800,3730));
 				monsters[2] = new Monster(COC, new Point(800, 3250));
-				monsters[3] = new Monster(BIGCOBRA, new Point(300, 3250));
+				monsters[3] = new Monster(VERYBIGCOBRA, new Point(300, 3250));
 				monsters[4] = new Monster(BIGCOBRA, new Point(550, 3250));
 				monsters[5] = new Monster(COC, new Point(400, 2290));
 				
