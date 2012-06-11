@@ -296,6 +296,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 		equipIcons[Item.WEAPON] = newImage("/equipWep.png");
 		equipIcons[Item.PANTS] = newImage("/equipLeg.png");
 		equipIcons[Item.TORSO] = newImage("/equipTorso.png");
+		equipIcons[Item.RING] = newImage("/equipRing.png");
+		equipIcons[Item.HELM] = newImage("/equipHelm.png");
+		equipIcons[Item.GLOVES] = newImage("/equipGlove.png");
+		equipIcons[Item.BOOTS] = newImage("/equipBoot.png");
 	}
 
 	// initialise le personnage
@@ -702,7 +706,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		if(c.stats.classe == MAGE)
 		g.setColor(Color.BLUE);
 		else if(c.stats.classe == ARCHER)
-		g.setColor(Color.YELLOW);
+		g.setColor(Color.ORANGE);
 		else if(c.stats.classe == FIGHTER)
 		g.setColor(Color.RED);
 		g.fill(manaBar());
@@ -1783,10 +1787,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxEnemiesHit = 1;
 				KBSpeed[0] = KBSpeed[1] = 0.05f;
 				KBSpeed[2] = 0.10f;
-				skillTime = 600;
-				hitTime[0] = 170;
-				hitTime[1] = 340;
-				hitTime[2] = 510;
+				skillTime = 500;
+				hitTime[0] = 140;
+				hitTime[1] = 270;
+				hitTime[2] = 400;
 				break;
 			case Arrow:
 				manaUsed = 0;
@@ -1804,7 +1808,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxEnemiesHit = 1;
 				skillTime = 500;
 				hitTime[0] = 150;
-				hitTime[1] = 250;
+				hitTime[1] = 300;
 				break;
 			case ExplosiveArrow:
 				manaUsed = 15;
@@ -1823,7 +1827,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				skillTime = 400;
 				break;
 			case FireBall:
-				manaUsed = 12;
+				manaUsed = 10;
 				dmgMult[0] = 1.46f + 0.11f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.13f;
 				maxEnemiesHit = 1;
@@ -1831,7 +1835,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				skillTime = 400;
 				break;
 			case Explosion:
-				manaUsed = 18;
+				manaUsed = 15;
 				dmgMult[0] = 1.13f + 0.07f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
 				maxEnemiesHit = 4+(int)(c.stats.skillLvls[skill] * 0.5f);
@@ -1899,16 +1903,16 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case MultiHit:
 				
 				attackL[0] = newImage("/attackL.png"); attackL[1] = newImage("/attackL2.png"); attackL[2] = newImage("/attackL3.png"); attackL[3] = newImage("/attackL4.png");
-				left.addScene(attackL[0], 50);
-				left.addScene(attackL[1], 50);
-				left.addScene(attackL[2], 50);
-				left.addScene(attackL[3], 50);
+				left.addScene(attackL[0], 42);
+				left.addScene(attackL[1], 42);
+				left.addScene(attackL[2], 42);
+				left.addScene(attackL[3], 42);
 				
 				attackR[0] = newImage("/attackR.png"); attackR[1] = newImage("/attackR2.png"); attackR[2] = newImage("/attackR3.png"); attackR[3] = newImage("/attackR4.png");
-				right.addScene(attackR[0], 50);
-				right.addScene(attackR[1], 50);
-				right.addScene(attackR[2], 50);
-				right.addScene(attackR[3], 50);
+				right.addScene(attackR[0], 42);
+				right.addScene(attackR[1], 42);
+				right.addScene(attackR[2], 42);
+				right.addScene(attackR[3], 42);
 				
 				break;
 			case DoubleArrow:
@@ -1974,12 +1978,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 						skillProjectiles[i] = null;
 						skillProjectiles[i] = new Projectile(
 								newAnimation(skill), this, i);
-						skillProjectiles[i].setX(getX() + getWidth() / 2);
 						skillProjectiles[i].setY(getY() + getHeight() / 2);
-						if (cLeft)
+						if (cLeft){
+							skillProjectiles[i].setX(getX() + getWidth() / 3 - skillProjectiles[i].getWidth());
 							skillProjectiles[i].setXVelocity(-1);
-						else
+						} else {
+							skillProjectiles[i].setX(getX() + 2 * getWidth() / 3);
 							skillProjectiles[i].setXVelocity(1);
+						}
 
 						Point target = getTarget(getAimArea());
 						if (target == null)
@@ -2022,8 +2028,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case FireBall:
 				Image fireBall = newImage("/fireball.png");
 				Image fireBall2 = newImage("/fireball2.png");
-				a.addScene(fireBall, 200);
-				a.addScene(fireBall2, 200);
+				a.addScene(fireBall, 100);
+				a.addScene(fireBall2, 00);
 				return a;
 			}
 			return null;
@@ -2375,7 +2381,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if (stats.life > maxLife)
 				stats.life = maxLife;
 			
-			if(stats.classe == MAGE)maxMana = 5 * (stats.lvl - 1); else maxMana = 0;
+			if(stats.classe == MAGE)maxMana = 5 * (stats.lvl-1); else maxMana = 0;
 			maxMana += 100;
 			maxMana = maxMana * (atts[SPIRIT]+100)/100;
 			if (stats.mana > maxMana)
@@ -2564,17 +2570,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if(stats.classe == MAGE){
 			if (stats.mana < maxMana)
 				manaRegen += timePassed;
-				if (manaRegen >= (1000 *100/(100+atts[SPIRIT]))) {
+				if (manaRegen >= ((1000 - stats.lvl*5) *100/(100+atts[SPIRIT]))) {
 					stats.mana++;
 					manaRegen = 0;
 				}
 			} else if(stats.classe == ARCHER){
 				if(stats.mana < maxMana){
 					manaRegen += timePassed;
-					if(c.getXVelocity()==0 && c.getYVelocity()==0)
-						manaRegen += 2*timePassed;
+					if((c.getXVelocity()==0 && c.getYVelocity()==0) || !c.canMove())
+						manaRegen += 5*timePassed;
 				}
-				if(manaRegen >= (1000 * 100/(100+atts[SPIRIT]))){
+				if(manaRegen >= (1200 * 100/(100+atts[SPIRIT]))){
 					stats.mana++;
 					manaRegen = 0;
 				}
@@ -2865,9 +2871,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 				}
 			}
 			
-			if(dmg > 0){
+			if(dmg > maxLife / 50 && canMove){
 			canMove = false;
-			cantMoveTime = (long) (100 + speed * 1100);
+			cantMoveTime = (long) (105 + speed * 1100);
 			setYVelocity(-(speed * 3));
 			if ((c.getX() + c.getWidth() / 2) > (getX() + getWidth() / 2))
 				speed = -speed;
@@ -3387,7 +3393,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				info = "Power increases all damage by 1%";
 				break;
 			case AGI:
-				info = "Agiliti increases your chance to hit by 1%";
+				info = "Agility increases your chance to hit by 1%";
 				break;
 			case VIT:
 				info = "Vitality increases your hp and healing/regen by 1%";

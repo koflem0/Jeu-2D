@@ -10,7 +10,7 @@ public class Inventory implements Serializable{
 		ItemSlot[][] itemSlot = new ItemSlot[8][8];
 		private Item[] equip = new Item[8];
 		ItemSlot[] equipSlot = new ItemSlot[8];
-		public static final int x = 550,y = 118,width = 700,height = 600;
+		public static final int x = 550,y = 38,width = 700,height = 600;
 		private transient Main.Character c;
 		
 		

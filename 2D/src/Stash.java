@@ -10,7 +10,7 @@ public class Stash implements Serializable{
 	PageButton[] pageButtons = new PageButton[4];
 	private int currentPage = 0;
 	private boolean open = false;
-	public static final int x=50,y=118,width=500,height=600;
+	public static final int x=50,y=38,width=500,height=600;
 	
 	
 	public Stash(){
