@@ -61,9 +61,13 @@ public class Item implements Serializable{
 		int stat;
 		int statMax = 8;
 		if(i == 0 && slot!=RING && slot!=AMULET){
-			stat = rand.nextInt(statMax+4);
-			if(stat >= statMax) enhancedD = rand.nextInt(15) + 11;
-			else generateStat(stat);
+			stat = rand.nextInt(4);
+			if(stat < 1) enhancedD = rand.nextInt(15) + 11;
+			else {
+				do{stat = rand.nextInt(statMax);}
+				while(stats[stat] != 0 || (stat==Main.MASTERY && slot != WEAPON));
+				generateStat(stat);
+			}
 		} else {
 			do{stat = rand.nextInt(statMax);}
 			while(stats[stat] != 0 || (stat==Main.MASTERY && slot != WEAPON));
