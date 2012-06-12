@@ -2644,7 +2644,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// saute
 		public void jump() {
 			onLadder = null;
-			if(inWater) setYVelocity(-1);
+			if(inWater) setYVelocity(-0.9f);
 			else setYVelocity(-1.5f);
 		}
 
@@ -2663,7 +2663,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					timer = 0;
 				}
 			}
-			if (canMove)
+			if (canMove())
 				if(inWater) setXVelocity(dir*0.29f);
 				else setXVelocity(dir * 0.38f);
 			
@@ -2706,9 +2706,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// fais tomber le presonnage
 		public void fall(long timePassed) {
-			if (getYVelocity() < 1) {
-				if(inWater) setYVelocity(getYVelocity() + (0.0023f * timePassed));
-				else setYVelocity(getYVelocity() + (0.0049f * timePassed));
+			if(inWater) {
+				if(getYVelocity() < 0.8f)
+				setYVelocity(getYVelocity() + (0.0020f * timePassed));
+			}
+			else if (getYVelocity() < 1) {
+				setYVelocity(getYVelocity() + (0.0049f * timePassed));
 			}
 		}
 
@@ -2725,6 +2728,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// retourne/change si le personnage peut bouger
 		public boolean canMove() {
+			if(inWater) return true;
 			if(onLadder!=null) return true;
 			return canMove;
 		}
@@ -3239,6 +3243,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 						vx = -vx;
 					c.setXVelocity(vx);
 					c.setYVelocity(-0.5f);
+					if(!c.inWater)
 					c.canMove(false);
 				}
 				c.setInvincible(1000);
