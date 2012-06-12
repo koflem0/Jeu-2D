@@ -999,6 +999,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		boolean inWater = false;
 		for(Rectangle wateur : water)
+			if(wateur != null)
 			if(wateur.intersects(c.getArea())) inWater = true;
 		
 		c.inWater = inWater;
@@ -1241,6 +1242,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		ladders = map.getLadders();
 		platforms = map.getPlatforms();
 		walls = map.getWalls();
+		water = map.getWater();
 
 		monsters = map.getMonsters();
 		spots = map.getSpots();
