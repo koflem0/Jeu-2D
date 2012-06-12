@@ -1975,11 +1975,29 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case DoubleArrow:
 			case Arrow:
 			case ExplosiveArrow:
+<<<<<<< HEAD
+				
+					Image walkleft1 = newImage("/walkleft1.png");
+					left.addScene(walkleft1, 200);
+				
+					Image walkright1 = newImage("/walkright1.png");
+					right.addScene(walkright1, 200);
+=======
 				Image walkleft1 = newImage("/walkleft1.png");
 				left.addScene(walkleft1, 200);
 				
 				Image walkright1 = newImage("/walkright1.png");
 				right.addScene(walkright1, 200);
+				break;
+			case FireBall:
+			case EnergyBall:
+			case Explosion:
+				Image wizStandL = newImage("/bobwalkwizzardL1.png");
+				left.addScene(wizStandL, 200);
+			
+				Image wizStandR = newImage("/bobwalkwizzardR1.png");
+				right.addScene(wizStandR, 200);
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
 				break;
 			case FireBall:
 			case EnergyBall:
@@ -2804,52 +2822,78 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxLife = 13;
 				timer = 12000;
 				exp = 4;
+<<<<<<< HEAD
+				lvl = 2;
+=======
 				lvl = 1;
-				avoid = 7;
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
+				avoid = 0;
 				name = "Cobra";
 				break;
 			case BIGCOBRA:
-				atk = 22;
+				atk = 20;
+<<<<<<< HEAD
 				def = 5;
 				mastery = 65;
 				spd = -0.35f;
-				maxLife = 25;
+				maxLife =29;
 				timer = 30000;
-				exp = 9;
+				exp = 13;
+=======
+				def = 7;
+				mastery = 65;
+				spd = -0.35f;
+				maxLife = 29;
+				timer = 30000;
+				exp = 11;
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
 				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
-				avoid = 12;
+				avoid = 9;
 				name = "Big Cobra";
 				break;
 			case VERYBIGCOBRA:
-				atk = 35;
-				def = 8;
+				atk = 28;
+				def = 9;
 				mastery = 50;
 				spd = -0.40f;
-				maxLife = 41;
+				maxLife = 50;
 				timer = 30000;
-				exp = 14;
-				lvl = 4;
+<<<<<<< HEAD
+				exp = 22;
+=======
+				exp = 20;
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
+				lvl = 5;
 				rarechance = 15;
 				dropchance = 25;
 				dropamount = 1;
-				avoid = 20;
+				avoid = 11;
 				name ="VBig Cobra";
 				break;
 			case COC:
-				atk = 28;
-				def = 29;
+<<<<<<< HEAD
+				atk = 20;
+=======
+				atk = 22;
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
+				def = 19;
 				mastery = 70;
 				spd = -0.37f;
 				maxLife = 99;
 				timer = 24000;
-				exp = 22;
+<<<<<<< HEAD
+				exp = 30;
 				lvl = 6;
+=======
+				exp = 23;
+				lvl = 7;
+>>>>>>> 997423c02f2981115492f128a4c6a568bcc2d32d
 				dropchance = 28;
 				dropamount = 1;
 				rarechance = 19;
-				avoid = 14;
+				avoid = 12;
 				name ="Beetle";
 				break;
 			}
