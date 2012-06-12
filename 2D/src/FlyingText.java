@@ -11,9 +11,9 @@ public class FlyingText extends Sprite {
 	private boolean active;
 	private Color color = Color.YELLOW;
 	
-	 public FlyingText(String t, Main.Character c){
+	 public FlyingText(int t, Main.Character c){
 		 active = true;
-		 text = t;
+		 text = ""+t;
 		 this.c = c;
 		 setX(c.getX() + c.getWidth()/3);
 		 setY(c.getY() + c.getHeight()/2 - moveUp);
@@ -24,10 +24,10 @@ public class FlyingText extends Sprite {
 		 active = false;
 	 }
 	 
-	 public FlyingText(String t, Main.Monster m, boolean crit){
+	 public FlyingText(int t, Main.Monster m, boolean crit){
 		 if(crit) color = Color.RED;
-		 text = t;
-		 if(t == "0") {
+		 text = ""+t;
+		 if(t == 0) {
 			 color = Color.WHITE;
 			 text = "miss";
 		 }

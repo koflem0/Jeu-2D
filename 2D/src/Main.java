@@ -84,6 +84,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	public void mainMenu() {
 		clip.stop();
+		clip.setFramePosition(0);
 		for (SaveButton saveButton : mainMenu.saveButtons) {
 			saveButton.refresh();
 		}
@@ -106,7 +107,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (c.stats.inventory.isOpen())
 			c.stats.inventory.toggle();
-
+		
+		if(!c.isAlive()) c.respawn();
+		
 		try {
 			File rootDir = new File("C:/");
 			if(isMac()) rootDir = new File(System.getProperty("user.home")+"/Documents");
@@ -231,7 +234,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			FloatControl gainControl = (FloatControl) clip
 					.getControl(FloatControl.Type.MASTER_GAIN);
 			gainControl.setValue(-11.0f);
-
+			clip.setLoopPoints(0, -1);
 			clip.loop(Clip.LOOP_CONTINUOUSLY);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -691,6 +694,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 					g.setColor(Color.GREEN);
 					g.fillRect(monster.getX() - (int) X, monster.getY() - 10
 							- (int) Y, f * monster.getWidth() / 100, 10);
+					g.setFont(new Font("Arial", Font.PLAIN, 14));
+					if(monster.elite) g.setColor(Color.ORANGE);
+					else g.setColor(Color.WHITE);
+					g.drawString("Lv" + monster.getLevel() + " "+monster.name, monster.getX()-(int)X, monster.getY()-12-(int)Y);
+					g.setColor(Color.WHITE);
+					g.drawString(monster.eliteType, monster.getX()-(int)X, monster.getY()-25-(int)Y);
 				}
 	}
 
@@ -1086,8 +1095,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 								if (damage[i] == null)
 									damage[i] = new FlyingText();
 								if (!damage[i].isActive()) {
-									damage[i] = new FlyingText(
-											Integer.toString(monster.hit(c)), c);
+									damage[i] = new FlyingText(monster.hit(c), c);
 									didHit = true;
 								}
 							}
@@ -1143,13 +1151,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 	// "Intelligence Artificielle" des monstres (les tourne s'il n'y a aucune
 	// plateforme plus loin)
 	public void turnMonster(Monster m) {
-
-		boolean turn;
+		
+		boolean turn, facingwall = false;
 		if (m.getYVelocity() == 0)
 			turn = true;
 		else
 			turn = false;
-
+		
+		
 		for (Wall wall : walls)
 			if (wall != null)
 				if (wall.getTop().intersects(m.getNextFloor()))
@@ -1161,13 +1170,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		for (Wall wall : walls)
 			if (wall != null)
-				if (wall.getSide().intersects(m.getSide()))
+				if (wall.getSide().intersects(m.getSide())){
 					turn = true;
-
+					facingwall = true;
+				}
+			
 		if (turn) {
 			if (m.canMove()) {
+				if(m.isAggro && m.isFacingChar() && !facingwall && m.getYVelocity()==0){ 
+					m.jump();
+				}else{
 				m.setXVelocity(-m.getXVelocity());
 				m.setFacingLeft(!m.isFacingLeft());
+				}
+				
 			} else
 				m.setXVelocity(0);
 		}
@@ -1355,10 +1371,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 					activatedSkillKey = key;
 
 			if (key == KeyEvent.VK_M)
-				if (clip.isRunning())
+				if (clip.isRunning()){
 					clip.stop();
-				else
-					clip.loop(Clip.LOOP_CONTINUOUSLY);
+					clip.setFramePosition(0);
+				}
+				else clip.loop(Clip.LOOP_CONTINUOUSLY);
+				
 			
 			if (key == KeyEvent.VK_I || key == KeyEvent.VK_Q) {
 				if(statMenu.isOpen())statMenu.toggle();
@@ -1404,6 +1422,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if (key == KeyEvent.VK_ESCAPE) {
 				classSelect = false;
 				clip.stop();
+				clip.setFramePosition(0);
 			}
 		} else {
 			if (key == KeyEvent.VK_ESCAPE)
@@ -1956,12 +1975,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case DoubleArrow:
 			case Arrow:
 			case ExplosiveArrow:
+				Image walkleft1 = newImage("/walkleft1.png");
+				left.addScene(walkleft1, 200);
 				
-					Image walkleft1 = newImage("/walkleft1.png");
-					left.addScene(walkleft1, 200);
-				
-					Image walkright1 = newImage("/walkright1.png");
-					right.addScene(walkright1, 200);
+				Image walkright1 = newImage("/walkright1.png");
+				right.addScene(walkright1, 200);
 				break;
 			case FireBall:
 			case EnergyBall:
@@ -2072,8 +2090,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case FireBall:
 				Image fireBall = newImage("/fireball.png");
 				Image fireBall2 = newImage("/fireball2.png");
-				a.addScene(fireBall, 100);
-				a.addScene(fireBall2, 00);
+				a.addScene(fireBall, 70);
+				a.addScene(fireBall2, 70);
 				return a;
 			}
 			return null;
@@ -2127,10 +2145,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 							skillProjectiles[0].getY() - 50, 200, 100);
 			default:
 				if (cLeft)
-					return (new Rectangle(getX(), getY(), getWidth() - 50,
+					return (new Rectangle(getX()+10, getY(), getWidth() - 70,
 							getHeight()));
 				else
-					return new Rectangle(getX() + 50, getY(), getWidth() - 50,
+					return new Rectangle(getX() + 60, getY(), getWidth() - 70,
 							getHeight());
 			}
 		}
@@ -2354,7 +2372,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		public void setClimbing(int i){
 			if(canMove)
-			if(onLadder!=null)setYVelocity(-i*0.4f);
+			if(onLadder!=null)setYVelocity(-i*0.35f);
 		}
 		
 		public void isPressingClimb(int i){
@@ -2387,6 +2405,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public void respawn() {
+			invincible = false;
+			canMove = true;
 			stats.life = maxLife;
 			stats.mana = maxMana;
 			setX(map.spawnPoint.x);
@@ -2553,24 +2573,24 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public Rectangle getBase() {
-			return new Rectangle(getX() + 15, getY() + getHeight() - 15,
-					getWidth() - 30, 20);
+			return new Rectangle(getX() + 25, getY() + getHeight() - 15,
+					getWidth() - 50, 20);
 		}
 
 		public Rectangle getTop() {
-			return new Rectangle(getX() + 10, getY() - 9, getWidth() - 20, 18);
+			return new Rectangle(getX() + 20, getY() - 9, getWidth() - 40, 18);
 		}
 
 		public Rectangle getArea() {
-			return new Rectangle(getX(), getY(), getWidth(), getHeight());
+			return new Rectangle(getX()+15, getY(), getWidth()-30, getHeight());
 		}
 
 		public Rectangle getLeftSide() {
-			return new Rectangle(getX() - 2, getY() + 13, 4, getHeight() - 24);
+			return new Rectangle(getX() +8, getY() + 13, 4, getHeight() - 24);
 		}
 
 		public Rectangle getRightSide() {
-			return new Rectangle(getX() + getWidth() - 2, getY() + 13, 4,
+			return new Rectangle(getX() + getWidth() - 12, getY() + 13, 4,
 					getHeight() - 24);
 		}
 
@@ -2756,17 +2776,22 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	public class Monster extends Sprite {
 
+		public static final int DMG = 0, SPD = 1, DEF = 2; 
+		
 		private long cantMoveTime;
 		private int atk, def, mastery, life, maxLife, exp, lvl,
-				dropchance = 13, rarechance = 8, dropamount = 1, avoid;
-		private float spd;
-		private boolean facingLeft = true, canMove = true, alive = false;
+				dropchance = 13, rarechance = 8, dropamount = 1,
+				avoid;
+		private float spd, allStatsMultiplier = 1;
+		private float[] statMultipliers = {1,1,1,1,1,1,1,1,1,1};
+		private boolean facingLeft = true, canMove = true, alive = false, isAggro = false, elite = false;
 		private Image[] monstreD = new Image[8],monstreG = new Image[5];
 		private Image monstreHitD, monstreHitL;
 		private Animation hitLeft, hitRight, left, right;
 		private Clip hitSound, dieSound;
 		private Point spawnPoint;
-		private long timer, deathTimer = 0, regen = 0;
+		private long timer, deathTimer = 200, regen = 0, aggroTimer = 5000;
+		public String name, eliteType = "";
 
 		public Monster(int i, Point spawn) {
 			getAnimations(i);
@@ -2781,24 +2806,26 @@ public class Main extends Core implements KeyListener, MouseListener,
 				exp = 4;
 				lvl = 2;
 				avoid = 0;
+				name = "Cobra";
 				break;
 			case BIGCOBRA:
 				atk = 20;
 				def = 5;
 				mastery = 65;
 				spd = -0.35f;
-				maxLife =29;
+				maxLife = 29;
 				timer = 30000;
 				exp = 13;
 				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
 				avoid = 9;
+				name = "Big Cobra";
 				break;
 			case VERYBIGCOBRA:
 				atk = 28;
 				def = 9;
-				mastery = 70;
+				mastery = 50;
 				spd = -0.40f;
 				maxLife = 50;
 				timer = 30000;
@@ -2808,6 +2835,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				dropchance = 25;
 				dropamount = 1;
 				avoid = 11;
+				name ="VBig Cobra";
 				break;
 			case COC:
 				atk = 20;
@@ -2817,11 +2845,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxLife = 99;
 				timer = 24000;
 				exp = 30;
-				lvl = 6;
+				lvl = 7;
 				dropchance = 28;
 				dropamount = 1;
 				rarechance = 19;
 				avoid = 12;
+				name ="Beetle";
 				break;
 			}
 			this.spawnPoint = spawn;
@@ -2829,28 +2858,65 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// initialise le monstre
 		public void init() {
-			life = maxLife;
+			randomElite();
+			life = getMaxLife();
 			alive = true;
 			setXVelocity(spd);
 			setX((float) spawnPoint.getX());
 			setY((float) spawnPoint.getY());
 		}
 
+		public void randomElite(){
+			Random rand = new Random();
+			if(1 > rand.nextInt(10)){
+				elite = true;
+				allStatsMultiplier = 1.3f;
+				
+				switch(rand.nextInt(3)){
+				case DEF : statMultipliers[DEF] = 1.3f; eliteType = "DEF"; break;
+				case DMG : statMultipliers[DMG] = 1.3f; eliteType = "DMG"; break;
+				case SPD : statMultipliers[SPD] = 1.3f; eliteType = "SPD"; break;
+				}
+			} else {
+				elite = false;
+				allStatsMultiplier = 1;
+				for(int i = 0; i < 10; i++){
+					statMultipliers[i] = 1;
+				}
+			}
+		}
+		
+		public boolean isFacingChar(){
+			if(c.getY()+c.getHeight() > getY()){
+				if((getXVelocity() > 0 && c.getX() > getX()) || (getXVelocity() < 0 && c.getX() < getX())) return true;
+			}
+			return false;
+		}
+		
+		public void jump(){
+			setYVelocity(-1);
+		}
+		
 		// change le point ou le monstre apparait
 		public void setSpawn(Point Spawn) {
 			spawnPoint = Spawn;
 		}
-
+		
+		public int getExp() {
+			return (int)(exp*allStatsMultiplier);
+		}
+		
 		// retourne la vie du monstre
 		public int getLife() {
 			return life;
 		}
 
 		public int getMaxLife() {
-			return maxLife;
+			return (int)(maxLife * allStatsMultiplier * statMultipliers[DEF]);
 		}
 
 		public int getLevel() {
+			if(elite) return lvl + 2;
 			return lvl;
 		}
 
@@ -2872,12 +2938,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public void update(long timePassed) {
 			if (alive) {
 				regen+= timePassed;
-				if(regen >= 30000/maxLife+300){
+				if(regen >= 40000/maxLife+200){
 					if(life < maxLife)
 					life++;
 					regen=0;
 				}
-				if (getXVelocity() == spd || getXVelocity() == -spd)
+				if (getXVelocity() == getSpeed() || getXVelocity() == -getSpeed())
 					if ((isFacingLeft() && getXVelocity() > 0)
 							|| (!(isFacingLeft()) && getXVelocity() < 0))
 						setXVelocity(-getXVelocity());
@@ -2887,6 +2953,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 				}
 				if (cantMoveTime <= 0)
 					canMove = true;
+				
+				if(isAggro){
+				if(aggroTimer>=0){
+					aggroTimer-=timePassed;
+				}
+				if(aggroTimer<=0) isAggro = false;
+				}
+				
 			} else {
 				deathTimer -= timePassed;
 				if (deathTimer <= 0) {
@@ -2918,6 +2992,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 			if (dmg > 0) {
 				life -= dmg;
+				isAggro = true; aggroTimer = 5000;
 			if (life <= 0)
 				die();
 			else if(hitSound != null) hitSound.start();
@@ -2928,8 +3003,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if (damage[j] == null)
 					damage[j] = new FlyingText();
 				if (!damage[j].isActive()) {
-					damage[j] = new FlyingText(Integer.toString(dmg), this,
-							crit);
+					damage[j] = new FlyingText(dmg, this,crit);
 					hit = true;
 				}
 			}
@@ -2947,11 +3021,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// fais mourir le monstre
 		private void die() {
 			if(dieSound != null) dieSound.start();
-			alive = false;
+			alive = false; isAggro = false;
 			deathTimer = timer;
-			if(lvl > c.stats.lvl-4)
+			if(lvl >= c.stats.lvl-5)
 			c.exp(exp);
-			for (int i = 0; i < dropamount; i++)
+			for (int i = 0; i < getdropamount(); i++)
 				drop();
 		}
 
@@ -2960,11 +3034,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 			Random rand = new Random();
 			int rarity = rand.nextInt(100);
 
-			if ((rand.nextInt(100)) < dropchance) {
+			if ((rand.nextInt(100)) < getdropchance()) {
 
-				if (rarity < rarechance)
+				if (rarity < getrarechance())
 					rarity = Item.RARE;
-				else if (rarity < rarechance * 4)
+				else if (rarity < (int)(getrarechance() * 4.5))
 					rarity = Item.MAGIC;
 				else
 					rarity = Item.COMMON;
@@ -2974,7 +3048,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					itemChoices = 6;
 				
 				int dropLvl = rand.nextInt(10);
-				if(dropLvl <= 3) dropLvl = lvl; else if(dropLvl <= 5) dropLvl = lvl+1; else dropLvl = lvl-1;
+				if(dropLvl <= 3) dropLvl = getLevel(); else if(dropLvl <= 5) dropLvl = getLevel()+1; else dropLvl = getLevel()-1;
 				
 				if(dropLvl < 1)dropLvl = 1;
 				
@@ -2982,6 +3056,19 @@ public class Main extends Core implements KeyListener, MouseListener,
 						new Point(getX() + rand.nextInt(getWidth() - 50),
 								getY() + getHeight() - 50)));
 			}
+		}
+		
+		private int getdropamount(){
+			if(elite) return dropamount+1;
+			return dropamount;
+		}
+		
+		private int getdropchance(){
+			return (int)(dropchance*allStatsMultiplier);
+		}
+		
+		private int getrarechance(){
+			return (int)(rarechance*allStatsMultiplier);
 		}
 
 		// load les animations du monstre
@@ -3072,11 +3159,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// retourne l'animation du monstre
 		public Animation getAnimation(boolean left) {
 			if (left){
-				if(!canMove) return this.hitLeft;
+				if(!canMove) return hitLeft;
 				return this.left;
 			}
 			else{
-				if(!canMove) return this.hitRight;
+				if(!canMove) return hitRight;
 				return right;
 			}
 		}
@@ -3097,7 +3184,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// retourne la défence du monstre
 		public int getDefense() {
-			return def;
+			return (int)(def * statMultipliers[DEF] * allStatsMultiplier);
 		}
 
 		// frappe un personnage
@@ -3122,15 +3209,25 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// retourne les dégats si le monstre frappe un personnage
 		public int getDamage(Character c) {
 			Random rand = new Random();
-			int dmast = rand.nextInt(100 - mastery) + mastery;
+			int dmast = rand.nextInt(100 - getMastery()) + getMastery();
 
-			int dmg = atk;
+			int dmg = getAtk();
 			dmg = dmg * dmast / 100;
 			dmg = (int) (dmg * (1 - c.getDefense()
 					/ (c.getDefense() + 22 * Math.pow(1.1, getLevel()))));
 			if (dmg <= 0)
 				dmg = 1;
 			return dmg;
+		}
+
+		private int getAtk(){
+			return (int)(atk * allStatsMultiplier * statMultipliers[DMG]);
+		}
+		
+		private int getMastery(){
+			int mast = (int)(mastery * allStatsMultiplier * statMultipliers[DMG]);
+			if(mast > 100) return 100;
+			return mast;
 		}
 
 		// fais tomber le monstre
@@ -3141,7 +3238,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// retourne la vitesse de base du monstre
 		public float getSpeed() {
-			return spd;
+			return spd*allStatsMultiplier*statMultipliers[SPD];
 		}
 
 		// retourne la base du monstre
@@ -3409,6 +3506,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			open = !open;
 			if (c.stats.inventory.isOpen())
 				c.stats.inventory.toggle();
+			if(stash.isOpen())
+				stash.toggle();
 		}
 
 		public Rectangle getArea() {
@@ -3664,6 +3763,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			open = !open;
 			if (c.stats.inventory.isOpen())
 				c.stats.inventory.toggle();
+			if(stash.isOpen())
+				stash.toggle();
 		}
 
 	}
