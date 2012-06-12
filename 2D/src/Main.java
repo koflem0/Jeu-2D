@@ -2853,13 +2853,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				name ="VBig Cobra";
 				break;
 			case COC:
-				atk = 28;
-				def = 29;
+				atk = 22;
+				def = 15;
 				mastery = 70;
 				spd = -0.37f;
-				maxLife = 99;
+				maxLife = 62;
 				timer = 24000;
-				exp = 22;
+				exp = 23;
 				lvl = 6;
 				dropchance = 28;
 				dropamount = 1;
