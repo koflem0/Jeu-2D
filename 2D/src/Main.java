@@ -3021,7 +3021,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			deathTimer = timer;
 			if(lvl >= c.stats.lvl-5)
 			c.exp(exp);
-			for (int i = 0; i < dropamount; i++)
+			for (int i = 0; i < getdropamount(); i++)
 				drop();
 		}
 
@@ -3052,6 +3052,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 						new Point(getX() + rand.nextInt(getWidth() - 50),
 								getY() + getHeight() - 50)));
 			}
+		}
+		
+		private int getdropamount(){
+			if(elite) return dropamount+1;
+			return dropamount;
 		}
 		
 		private int getdropchance(){
