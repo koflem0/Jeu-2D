@@ -826,14 +826,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 				}
 			}
 			
-			if(c.onLadder){
-				boolean onLadder = false;
-				for(Ladder ladder : ladders)if(ladder !=null) if(c.getArea().intersects(ladder)) onLadder = true;
+			if(c.onLadder!=null){
+				Ladder onLadder = null;
+				for(Ladder ladder : ladders)if(ladder !=null) if(c.getArea().intersects(ladder)) onLadder = ladder;
 				
 				c.onLadder = onLadder;
 			}
 			
-			if(!c.onLadder || !c.canMove)
+			if(c.onLadder==null || !c.canMove)
 			c.fall(timePassed);
 
 			for (Monster monster : monsters)
@@ -997,13 +997,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 					if (c.getYVelocity() > 0 && !down) {
 						c.setYVelocity(0);
 						c.setY(platform.getTopY() - c.getHeight());
-					} else if(c.getYVelocity() >= 0 && c.onLadder){
+					} else if(c.getYVelocity() >= 0 && c.onLadder != null){
 						boolean touchesLadder = false;
 						for(Ladder ladder : ladders)
 							if(ladder!=null)
 							if(platform.getTop().intersects(ladder.getTop()) || platform.getTop().intersects(ladder)) touchesLadder = true;
 						if(!touchesLadder){
-							c.onLadder = false;
+							c.onLadder = null;
 							c.setYVelocity(0);
 							c.setY(platform.getTopY() - c.getHeight());
 						}
@@ -1029,7 +1029,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					if (c.getYVelocity() >= 0) {
 						c.setYVelocity(0);
 						c.setY(wall.getTopY() - c.getHeight());
-						c.onLadder = false;
+						c.onLadder = null;
 						if (!c.canMove()) {
 							c.setXVelocity(0);
 							c.canMove(true);
@@ -1102,11 +1102,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (c.getYVelocity() == 0) {
 			if (c.getXVelocity() > 0){
-				if(c.onLadder) c.setAnimation(sideClimb);
+				if(c.onLadder!=null) c.setAnimation(sideClimb);
 				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkR);
 				else c.setAnimation(walkR);
 			} else if (c.getXVelocity() < 0){
-				if(c.onLadder) c.setAnimation(sideClimb);
+				if(c.onLadder!=null) c.setAnimation(sideClimb);
 				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkL);
 				else c.setAnimation(walkL);
 			} else {
@@ -1117,11 +1117,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 					if(c.stats.classe == MAGE) c.setAnimation(wizStandR);
 					else c.setAnimation(standR);
 				}
-				if(c.onLadder) c.setAnimation(onLadder);
+				if(c.onLadder!=null) c.setAnimation(onLadder);
 			}
 	
 			
-		} else if(c.onLadder)c.setAnimation(climb); 
+		} else if(c.onLadder!=null)c.setAnimation(climb); 
 		else if (c.isFacingLeft()){
 			if(c.stats.classe == MAGE) c.setAnimation(wizJumpR);
 			else c.setAnimation(jumpL);
@@ -1320,7 +1320,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 							if (c.getBase().intersects(wall.getTop())
 									&& c.getYVelocity() == 0)
 								c.jump();
-					if(c.onLadder) c.jump();
+					if(c.onLadder!=null) c.jump();
 				} else if (key == KeyEvent.VK_LEFT) {
 					c.move(LEFT);
 					c.setFacingLeft(true);
@@ -1348,7 +1348,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			
 			
 			if(c.isAlive())
-			if(!c.onLadder)
+			if(c.onLadder==null)
 			if(key<256)
 			if (activatedSkillKey == -1 && skills[SkillKeys[key]] != null)
 				if (skills[SkillKeys[key]].getLvl() > 0)
@@ -2285,7 +2285,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		private int[] skillKeys = new int[256];
 		private boolean usingSkill = false;
 		private boolean alive = true;
-		public boolean onLadder = false;
+		public Ladder onLadder = null;
 		public int pressingClimb;
 		private Clip hitSound, dieSound;
 
@@ -2348,7 +2348,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		public void setClimbing(int i){
 			if(canMove)
-			if(onLadder)setYVelocity(-i*0.4f);
+			if(onLadder!=null)setYVelocity(-i*0.4f);
 		}
 		
 		public void isPressingClimb(int i){
@@ -2358,8 +2358,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public void climb(int i){
 			if(canMove()){
 			for(Ladder ladder : ladders) if(ladder!=null)
-				if(c.getArea().intersects(ladder)) c.onLadder = true;
-				if(c.onLadder) c.setClimbing(i);
+				if(c.getArea().intersects(ladder)) c.onLadder = ladder;
+				if(c.onLadder != null) c.setClimbing(i);
 			}
 		}
 		
@@ -2579,14 +2579,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// saute
 		public void jump() {
-			onLadder = false;
+			onLadder = null;
 			setYVelocity(-1.5f);
 		}
 
 		// update la mana, l'invincibilité et le mouvement du personnage
 		public void update(long timePassed) {
 			
-			if(!onLadder)
+			if(onLadder==null)
 			if(pressingClimb != 0){
 				c.climb(pressingClimb);
 			}
@@ -2604,6 +2604,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				setXVelocity(dir * 0.38f);
 			if (usingSkill && getYVelocity() == 0)
 				setXVelocity(0);
+			
+			if(onLadder != null)
+			if(onLadder.fixedX){
+				setX((float)(onLadder.getX()+onLadder.getWidth()/2-getWidth()/2));
+				setXVelocity(0);
+			}
 			
 			if(stats.classe == MAGE){
 			if (stats.mana < maxMana)
@@ -2653,7 +2659,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// retourne/change si le personnage peut bouger
 		public boolean canMove() {
-			if(onLadder) return true;
+			if(onLadder!=null) return true;
 			return canMove;
 		}
 
@@ -2677,7 +2683,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if(stats.exp < 0) stats.exp = 0;
 				if(dieSound != null) dieSound.start();
 			} else if(hitSound!= null) hitSound.start();
-			onLadder = false;
+			onLadder = null;
 			}
 		}
 
@@ -3280,11 +3286,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 				background = newImage("/map2.jpg");
 				ladders[0] = new Ladder(987,platforms[1],100,4415-4020);
 				ladders[1] = new Ladder(945,4120,125,540);
-				ladders[2] = new Ladder(1220,platforms[2],1337-1220,4100-3870);
-				ladders[3] = new Ladder(1850,platforms[3],25,4012-3860);
+				ladders[2] = new Ladder(1200,platforms[2],1337-1220,4100-3870);
+				ladders[3] = new Ladder(1850,platforms[3],5,4012-3860, true);
 				ladders[4] = new Ladder(815,platforms[6],971-815,3773-3341);
-				ladders[5] = new Ladder(496,2817,25,3185-2830);
-				ladders[6] = new Ladder(350,platforms[8],25,2800-2620);
+				ladders[5] = new Ladder(505,2817,5,3185-2830, true);
+				ladders[6] = new Ladder(340,platforms[8],5,2800-2500, true);
 				ladders[7] = new Ladder(804,2350,1110-804,2600-2350);
 				spots[1] = new Spot(new Point(Xlimit-125,4009-200), new Point(25,830-200),3, new Point(0,0));
 				break;
