@@ -2778,24 +2778,24 @@ public class Main extends Core implements KeyListener, MouseListener,
 			getAnimations(i);
 			switch (i) {
 			case COBRA:
-				atk = 11;
+				atk = 12;
 				def = 2;
 				mastery = 50;
 				spd = -0.240f;
 				maxLife = 13;
 				timer = 12000;
-				exp = 3;
+				exp = 4;
 				lvl = 1;
 				avoid = 0;
 				break;
 			case BIGCOBRA:
 				atk = 20;
 				def = 7;
-				mastery = 70;
+				mastery = 65;
 				spd = -0.35f;
-				maxLife = 32;
+				maxLife = 29;
 				timer = 30000;
-				exp = 7;
+				exp = 11;
 				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
@@ -2804,11 +2804,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case VERYBIGCOBRA:
 				atk = 28;
 				def = 9;
-				mastery = 70;
+				mastery = 50;
 				spd = -0.40f;
-				maxLife = 70;
+				maxLife = 50;
 				timer = 30000;
-				exp = 12;
+				exp = 20;
 				lvl = 5;
 				rarechance = 15;
 				dropchance = 25;
@@ -2816,17 +2816,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 				avoid = 11;
 				break;
 			case COC:
-				atk = 25;
-				def = 40;
+				atk = 22;
+				def = 19;
 				mastery = 70;
-				spd = -0.45f;
-				maxLife = 170;
+				spd = -0.37f;
+				maxLife = 99;
 				timer = 24000;
 				exp = 23;
 				lvl = 7;
 				dropchance = 28;
 				dropamount = 1;
-				rarechance = 13;
+				rarechance = 19;
 				avoid = 12;
 				break;
 			}
@@ -3283,8 +3283,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				platforms[9] = new Platform(220,2353, 180);
 				platforms[10] = new Platform(1150,2436, 1333-1150);
 				
-				monsters[0] = new Monster(COC, new Point(600,Ylimit-100));
-				monsters[6] = new Monster(VERYBIGCOBRA, new Point(800,Ylimit-100));
+				monsters[0] = new Monster(VERYBIGCOBRA, new Point(600,Ylimit-100));
 				monsters[7] = new Monster(BIGCOBRA, new Point(1000,Ylimit-100));
 				monsters[8] = new Monster(COBRA, new Point(1200,Ylimit-100));
 				monsters[9] = new Monster(COBRA, new Point(1400,Ylimit-100));
