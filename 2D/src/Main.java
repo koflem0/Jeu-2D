@@ -699,6 +699,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					else g.setColor(Color.WHITE);
 					g.drawString("Lv" + monster.getLevel() + " "+monster.name, monster.getX()-(int)X, monster.getY()-12-(int)Y);
 					g.setColor(Color.WHITE);
+					if(monster.elite)
 					g.drawString(monster.eliteType, monster.getX()-(int)X, monster.getY()-25-(int)Y);
 				}
 	}
