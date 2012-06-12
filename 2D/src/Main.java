@@ -695,9 +695,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 					g.fillRect(monster.getX() - (int) X, monster.getY() - 10
 							- (int) Y, f * monster.getWidth() / 100, 10);
 					g.setFont(new Font("Arial", Font.PLAIN, 14));
-					if(monster.elite) g.setColor(Color.BLUE);
+					if(monster.elite) g.setColor(Color.ORANGE);
 					else g.setColor(Color.WHITE);
 					g.drawString("Lv" + monster.getLevel() + " "+monster.name, monster.getX()-(int)X, monster.getY()-12-(int)Y);
+					g.setColor(Color.WHITE);
+					g.drawString(monster.eliteType, monster.getX()-(int)X, monster.getY()-25-(int)Y);
 				}
 	}
 
@@ -2789,7 +2791,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		private Clip hitSound, dieSound;
 		private Point spawnPoint;
 		private long timer, deathTimer = 200, regen = 0, aggroTimer = 5000;
-		public String name;
+		public String name, eliteType = "";
 
 		public Monster(int i, Point spawn) {
 			getAnimations(i);
@@ -2871,9 +2873,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 				allStatsMultiplier = 1.3f;
 				
 				switch(rand.nextInt(3)){
-				case DEF : statMultipliers[DEF] = 1.3f; break;
-				case DMG : statMultipliers[DMG] = 1.3f; break;
-				case SPD : statMultipliers[SPD] = 1.3f; break;
+				case DEF : statMultipliers[DEF] = 1.3f; eliteType = "DEF"; break;
+				case DMG : statMultipliers[DMG] = 1.3f; eliteType = "DMG"; break;
+				case SPD : statMultipliers[SPD] = 1.3f; eliteType = "SPD"; break;
 				}
 			} else {
 				elite = false;
