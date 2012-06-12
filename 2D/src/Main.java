@@ -44,6 +44,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private Platform[] platforms;
 	private Wall[] walls;
 	private Ladder[] ladders;
+	private Rectangle[] water;
 	private Map map;
 	private Monster[] monsters;
 	private FlyingText[] damage = new FlyingText[20];
@@ -995,6 +996,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	// teste les collisions
 	public void test() {
+		
+		boolean inWater = false;
+		for(Rectangle wateur : water)
+			if(wateur.intersects(c.getArea())) inWater = true;
+		
+		c.inWater = inWater;
+		
 
 		for (Platform platform : platforms) {
 			if (platform != null)
@@ -1338,6 +1346,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 									&& c.getYVelocity() == 0)
 								c.jump();
 					if(c.onLadder!=null) c.jump();
+					if(c.inWater && c.getYVelocity() > 0) c.jump();
+					
 				} else if (key == KeyEvent.VK_LEFT) {
 					c.move(LEFT);
 					c.setFacingLeft(true);
@@ -1773,7 +1783,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if(!c.stats.inventory.getArea().contains(
 						e.getLocationOnScreen())) {
 					add(new Drop(draggedItem, new Point(c.getX()
-							+ rand.nextInt(c.getWidth() - 50), c.getY()
+							+ rand.nextInt(120 - 50), c.getY()
 							+ c.getHeight() - 50)));
 					onItemSlot = true;
 				}
@@ -2313,7 +2323,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public Ladder onLadder = null;
 		public int pressingClimb;
 		private Clip hitSound, dieSound;
-
+		public boolean inWater;
+		
 		public Character(int classe) {
 			super();
 			loadStats();
@@ -2669,7 +2680,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// fais tomber le presonnage
 		public void fall(long timePassed) {
 			if (getYVelocity() < 1) {
-				setYVelocity(getYVelocity() + (0.0049f * timePassed));
+				if(inWater) setYVelocity(getYVelocity() + (0.0023f * timePassed));
+				else setYVelocity(getYVelocity() + (0.0049f * timePassed));
 			}
 		}
 
@@ -3054,7 +3066,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if(dropLvl < 1)dropLvl = 1;
 				
 				add(new Drop(new Item(dropLvl, rand.nextInt(itemChoices), rarity),
-						new Point(getX() + rand.nextInt(getWidth() - 50),
+						new Point(getX() + rand.nextInt(getWidth() >= 50 ? getWidth() - 50 : 1),
 								getY() + getHeight() - 50)));
 			}
 		}
@@ -3227,7 +3239,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		private int getMastery(){
 			int mast = (int)(mastery * allStatsMultiplier * statMultipliers[DMG]);
-			if(mast > 100) return 100;
+			if(mast >= 100) return 99;
 			return mast;
 		}
 
@@ -3308,6 +3320,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		private Monster[] monsters = new Monster[25];
 		private Image background;
 		private Ladder[] ladders = new Ladder[25];
+		private Rectangle[] water = new Rectangle[5];
 		public Point spawnPoint = new Point(50,50), spawnCamera = new Point(0,0);
 
 		public Map(int number) {
@@ -3427,6 +3440,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		public Ladder[] getLadders() {
 			return ladders;
+		}
+		
+		public Rectangle[] getWater() {
+			return water;
 		}
 
 		// quatre murs limites
