@@ -2778,7 +2778,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spd = -0.240f;
 				maxLife = 13;
 				timer = 12000;
-				exp = 3;
+				exp = 4;
 				lvl = 2;
 				avoid = 0;
 				break;
@@ -2789,7 +2789,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spd = -0.35f;
 				maxLife =29;
 				timer = 30000;
-				exp = 12;
+				exp = 13;
 				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
@@ -2802,7 +2802,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spd = -0.40f;
 				maxLife = 50;
 				timer = 30000;
-				exp = 20;
+				exp = 22;
 				lvl = 5;
 				rarechance = 15;
 				dropchance = 25;
@@ -2816,7 +2816,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spd = -0.37f;
 				maxLife = 99;
 				timer = 24000;
-				exp = 28;
+				exp = 30;
 				lvl = 6;
 				dropchance = 28;
 				dropamount = 1;
