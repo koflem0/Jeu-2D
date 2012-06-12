@@ -619,12 +619,30 @@ public class Main extends Core implements KeyListener, MouseListener,
 	}
 
 	private void drawSkillMenu(Graphics2D g) {
-		g.setFont(new Font("Arial", Font.PLAIN, 14));
 		g.setColor(Color.GRAY);
 		g.fill(skillMenu.getArea());
 		for (SkillButton skillButton : skillMenu.skillButtons) {
 			g.setColor(Color.WHITE);
 			g.fill(skillButton.getArea());
+			
+			
+			if(!skillButton.passive){
+				
+				g.setFont(new Font("Arial", Font.BOLD, 18));
+				switch(c.stats.classe){
+				case MAGE : g.setColor(Color.BLUE); break;
+				case FIGHTER : g.setColor(Color.RED); break;
+				case ARCHER : g.setColor(Color.ORANGE); break;
+				}
+				
+				String manaUsed = "" + skills[skillButton.skill].manaUsed;;
+				if(skills[skillButton.skill].manaUsed < 0) {manaUsed = "+"+(-skills[skillButton.skill].manaUsed);}
+				g.drawString(manaUsed,
+						skillButton.getNamePos().x - 465,
+						skillButton.getNamePos().y);
+			}
+			
+			g.setFont(new Font("Arial", Font.PLAIN, 14));
 			g.setColor(Color.BLACK);
 			String skillName = skillButton.getName();
 			g.drawString(skillName, skillButton.getNamePos().x + 23 - 4
@@ -634,7 +652,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				lvl = "" + passives[skillButton.skill].getLvl();
 			else
 				lvl = "" + skills[skillButton.skill].getLvl();
-			g.drawString(lvl, skillButton.getNamePos().x + 15,
+			g.drawString(lvl, skillButton.getNamePos().x + 15, 
 					skillButton.getNamePos().y - 20);
 			g.drawString(skillButton.getInfo(),
 					skillButton.getNamePos().x - 415,
@@ -1897,20 +1915,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 				skillTime = 400;
 				break;
 			case FireBall:
-				manaUsed = 10;
-				dmgMult[0] = 1.46f + 0.11f * c.stats.skillLvls[skill];
+				manaUsed = 8 + (int)(c.stats.skillLvls[skill]*0.4);
+				dmgMult[0] = 1.34f + 0.11f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.13f;
 				maxEnemiesHit = 1;
 				hitTime[0] = 200;
 				skillTime = 400;
 				break;
 			case Explosion:
-				manaUsed = 15;
-				dmgMult[0] = 1.13f + 0.07f * c.stats.skillLvls[skill];
+				manaUsed = 10 + c.stats.skillLvls[skill];
+				dmgMult[0] = 0.73f + 0.07f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
-				maxEnemiesHit = 4+(int)(c.stats.skillLvls[skill] * 0.5f);
-				hitTime[0] = 300;
-				skillTime = 500;
+				maxEnemiesHit = 3+(int)(c.stats.skillLvls[skill] * 0.5f);
+				hitTime[0] = 400;
+				skillTime = 600;
 				break;
 			}
 		}
@@ -2219,15 +2237,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 						hit[i] = false;
 					shots = 0; active = true;
 					
-					if(skill == Explosion) {
-					Animation a = new Animation();
-					for (int j = 1; j <= 10; j++) {
-						a.addScene(newImage("/explos" + j + ".png"), 50);
-					}
-					skillEffect = new Effect(new Point(c.getX() + c.getWidth() / 2
-							- 250, c.getY() - 80), a, 500, true);
-					add(skillEffect);
-					}
+					skillEffects();
 				}
 			} else {
 				switch(c.stats.classe){
@@ -2235,6 +2245,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 				case MAGE : skills[EnergyBall].activate(); break;
 				case ARCHER : skills[Arrow].activate();break;
 				}
+			}
+		}
+		
+		private void skillEffects(){
+			Animation a = new Animation();
+			switch(skill){
+			case Explosion:
+				for (int j = 1; j <= 10; j++) {
+					a.addScene(newImage("/explos" + j + ".png"), 60);
+				}
+				skillEffect = new Effect(new Point(c.getX() + c.getWidth() / 2
+						- 250, c.getY() - 80), a, 500, true);
+				add(skillEffect);
+				break;
 			}
 		}
 
@@ -2861,9 +2885,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 				timer = 24000;
 				exp = 23;
 				lvl = 7;
-				dropchance = 28;
+				dropchance = 24;
 				dropamount = 1;
-				rarechance = 19;
+				rarechance = 14;
 				avoid = 12;
 				name ="Beetle";
 				break;
@@ -3739,7 +3763,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		public SkillButton[] skillButtons = new SkillButton[3];
 		private boolean open;
-		private int x = 650, y = 100, width = 550, height = 425;
+		private int x = 600, y = 100, width = 600, height = 425;
 
 		public SkillMenu() {
 			refresh();
