@@ -84,6 +84,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	public void mainMenu() {
 		clip.stop();
+		clip.setFramePosition(0);
 		for (SaveButton saveButton : mainMenu.saveButtons) {
 			saveButton.refresh();
 		}
@@ -106,7 +107,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (c.stats.inventory.isOpen())
 			c.stats.inventory.toggle();
-
+		
+		if(!c.isAlive()) c.respawn();
+		
 		try {
 			File rootDir = new File("C:/");
 			if(isMac()) rootDir = new File(System.getProperty("user.home")+"/Documents");
@@ -231,7 +234,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			FloatControl gainControl = (FloatControl) clip
 					.getControl(FloatControl.Type.MASTER_GAIN);
 			gainControl.setValue(-11.0f);
-
+			clip.setLoopPoints(0, -1);
 			clip.loop(Clip.LOOP_CONTINUOUSLY);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1086,8 +1089,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 								if (damage[i] == null)
 									damage[i] = new FlyingText();
 								if (!damage[i].isActive()) {
-									damage[i] = new FlyingText(
-											Integer.toString(monster.hit(c)), c);
+									damage[i] = new FlyingText(monster.hit(c), c);
 									didHit = true;
 								}
 							}
@@ -1355,10 +1357,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 					activatedSkillKey = key;
 
 			if (key == KeyEvent.VK_M)
-				if (clip.isRunning())
+				if (clip.isRunning()){
 					clip.stop();
-				else
-					clip.loop(Clip.LOOP_CONTINUOUSLY);
+					clip.setFramePosition(0);
+				}
+				else clip.loop(Clip.LOOP_CONTINUOUSLY);
+				
 			
 			if (key == KeyEvent.VK_I || key == KeyEvent.VK_Q) {
 				if(statMenu.isOpen())statMenu.toggle();
@@ -1404,6 +1408,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if (key == KeyEvent.VK_ESCAPE) {
 				classSelect = false;
 				clip.stop();
+				clip.setFramePosition(0);
 			}
 		} else {
 			if (key == KeyEvent.VK_ESCAPE)
@@ -1956,12 +1961,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case DoubleArrow:
 			case Arrow:
 			case ExplosiveArrow:
+				Image walkleft1 = newImage("/walkleft1.png");
+				left.addScene(walkleft1, 200);
 				
-					Image walkleft1 = newImage("/walkleft1.png");
-					left.addScene(walkleft1, 200);
-				
-					Image walkright1 = newImage("/walkright1.png");
-					right.addScene(walkright1, 200);
+				Image walkright1 = newImage("/walkright1.png");
+				right.addScene(walkright1, 200);
 				break;
 			case FireBall:
 			case EnergyBall:
@@ -2072,8 +2076,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case FireBall:
 				Image fireBall = newImage("/fireball.png");
 				Image fireBall2 = newImage("/fireball2.png");
-				a.addScene(fireBall, 100);
-				a.addScene(fireBall2, 00);
+				a.addScene(fireBall, 70);
+				a.addScene(fireBall2, 70);
 				return a;
 			}
 			return null;
@@ -2354,7 +2358,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		public void setClimbing(int i){
 			if(canMove)
-			if(onLadder!=null)setYVelocity(-i*0.4f);
+			if(onLadder!=null)setYVelocity(-i*0.35f);
 		}
 		
 		public void isPressingClimb(int i){
@@ -2387,6 +2391,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		public void respawn() {
+			invincible = false;
+			canMove = true;
 			stats.life = maxLife;
 			stats.mana = maxMana;
 			setX(map.spawnPoint.x);
@@ -2790,7 +2796,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxLife = 32;
 				timer = 30000;
 				exp = 7;
-				lvl = 2;
+				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
 				avoid = 9;
@@ -2803,7 +2809,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxLife = 70;
 				timer = 30000;
 				exp = 12;
-				lvl = 3;
+				lvl = 5;
 				rarechance = 15;
 				dropchance = 25;
 				dropamount = 1;
@@ -2817,7 +2823,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				maxLife = 170;
 				timer = 24000;
 				exp = 23;
-				lvl = 4;
+				lvl = 7;
 				dropchance = 28;
 				dropamount = 1;
 				rarechance = 13;
@@ -2928,8 +2934,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if (damage[j] == null)
 					damage[j] = new FlyingText();
 				if (!damage[j].isActive()) {
-					damage[j] = new FlyingText(Integer.toString(dmg), this,
-							crit);
+					damage[j] = new FlyingText(dmg, this,crit);
 					hit = true;
 				}
 			}
@@ -2949,7 +2954,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			if(dieSound != null) dieSound.start();
 			alive = false;
 			deathTimer = timer;
-			if(lvl > c.stats.lvl-4)
+			if(lvl >= c.stats.lvl-5)
 			c.exp(exp);
 			for (int i = 0; i < dropamount; i++)
 				drop();
@@ -3410,6 +3415,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			open = !open;
 			if (c.stats.inventory.isOpen())
 				c.stats.inventory.toggle();
+			if(stash.isOpen())
+				stash.toggle();
 		}
 
 		public Rectangle getArea() {
@@ -3665,6 +3672,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			open = !open;
 			if (c.stats.inventory.isOpen())
 				c.stats.inventory.toggle();
+			if(stash.isOpen())
+				stash.toggle();
 		}
 
 	}
