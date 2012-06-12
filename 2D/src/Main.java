@@ -2644,16 +2644,15 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// saute
 		public void jump() {
 			onLadder = null;
-			setYVelocity(-1.5f);
+			if(inWater) setYVelocity(-1);
+			else setYVelocity(-1.5f);
 		}
 
 		// update la mana, l'invincibilité et le mouvement du personnage
 		public void update(long timePassed) {
 			
 			if(onLadder==null)
-			if(pressingClimb != 0){
-				c.climb(pressingClimb);
-			}
+			if(pressingClimb != 0) c.climb(pressingClimb);
 			
 			c.setClimbing(pressingClimb);
 			
@@ -2665,7 +2664,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 				}
 			}
 			if (canMove)
-				setXVelocity(dir * 0.38f);
+				if(inWater) setXVelocity(dir*0.29f);
+				else setXVelocity(dir * 0.38f);
+			
 			if (usingSkill && getYVelocity() == 0)
 				setXVelocity(0);
 			
