@@ -3216,7 +3216,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					c.setYVelocity(-0.5f);
 					c.canMove(false);
 				}
-				c.setInvincible(1500);
+				c.setInvincible(1000);
 			}
 			return dmg;
 		}
