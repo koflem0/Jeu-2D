@@ -2902,6 +2902,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 			spawnPoint = Spawn;
 		}
 		
+		public int getExp() {
+			return (int)(exp*allStatsMultiplier);
+		}
+		
 		// retourne la vie du monstre
 		public int getLife() {
 			return life;
@@ -3017,7 +3021,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		// fais mourir le monstre
 		private void die() {
 			if(dieSound != null) dieSound.start();
-			alive = false;
+			alive = false; isAggro = false;
 			deathTimer = timer;
 			if(lvl >= c.stats.lvl-5)
 			c.exp(exp);
