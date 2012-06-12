@@ -20,7 +20,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private static final long serialVersionUID = 1L;
 	public static final int LEFT = -1, RIGHT = 1;
 	public static final int POW = 0, AGI = 1, SPIRIT = 2, VIT = 3, CRIT = 4,
-			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 8, WATK = 9;
+			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 19, WATK = 20;
 	public static final int MAGE = 2, FIGHTER = 0, ARCHER = 1;
 	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2, VERYBIGCOBRA = 3;
 
@@ -39,7 +39,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private Character c;
 	private Image bg, spotImage;
 	private Image[] itemIcons = new Image[8], equipIcons = new Image[8];
-	private Animation walkL, walkR, standL, standR, jumpR, jumpL;
+	private Animation walkL, walkR, standL, standR, jumpR, jumpL, climb, onLadder, sideClimb
+						, wizWalkL, wizWalkR, wizStandL, wizStandR, wizJumpL, wizJumpR;
 	private Platform[] platforms;
 	private Wall[] walls;
 	private Ladder[] ladders;
@@ -259,30 +260,53 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		bg = newImage("/forest1.png");
 		spotImage = newImage("/spot.png");
-		Image standingR = newImage("/walkright1.png");
-		Image jumpingR = newImage("/walkright2.png");
-		Image standingL = newImage("/walkleft1.png");
-		Image jumpingL = newImage("/walkleft2.png");
-
-		walkR = new Animation();
-		walkL = new Animation();
+		Image standingR = newImage("/walkright1.png"),wizStandingR = newImage("/bobwalkwizzardR1.png"),
+		jumpingR = newImage("/walkright2.png"), wizJumpingR = newImage("/bobwalkwizzardR2.png"),
+		standingL = newImage("/walkleft1.png"), wizStandingL = newImage("/bobwalkwizzardL1.png"),
+		jumpingL = newImage("/walkleft2.png"), wizJumpingL = newImage("/bobwalkwizzardL2.png"),
+		standingladder = newImage("/bobclimb1.png");
+		
+		walkR = new Animation(); wizWalkR = new Animation();
+		walkL = new Animation(); wizWalkL = new Animation();
+		climb = new Animation();
 		for (int i = 1; i <= 3; i++) {
-			walkR.addScene(newImage("/walkright" + i + ".png"), 150);
-			walkL.addScene(newImage("/walkleft" + i + ".png"), 150);
+			climb.addScene(newImage("/bobclimb" + i + ".png"), 120);
+			walkR.addScene(newImage("/walkright" + i + ".png"), 150); 
+			wizWalkR.addScene(newImage("/bobwalkwizzardR" + i + ".png"), 150);
+			walkL.addScene(newImage("/walkleft" + i + ".png"), 150); 
+			wizWalkL.addScene(newImage("/bobwalkwizzardL" + i + ".png"), 150);
 			if (i == 2) {
+				climb.addScene(newImage("/bobclimb" + 1 + ".png"), 120);
 				walkR.addScene(newImage("/walkright" + 1 + ".png"), 150);
+				wizWalkR.addScene(newImage("/bobwalkwizzardR" + 1 + ".png"), 150);
 				walkL.addScene(newImage("/walkleft" + 1 + ".png"), 150);
+				wizWalkL.addScene(newImage("/bobwalkwizzardL" + 1 + ".png"), 150);
 			}
 		}
+		
+		sideClimb = new Animation();
+		sideClimb.addScene(newImage("/bobclimbL1.png"), 160);
+		sideClimb.addScene(newImage("/bobclimbL2.png"), 160);
+		onLadder = new Animation();
+		onLadder.addScene(standingladder, 200);
 		standL = new Animation();
 		standL.addScene(standingL, 200);
 		standR = new Animation();
 		standR.addScene(standingR, 200);
+		wizStandL = new Animation();
+		wizStandL.addScene(wizStandingL,200);
+		wizStandR = new Animation();
+		wizStandR.addScene(wizStandingR,200);
 		jumpR = new Animation();
 		jumpR.addScene(jumpingR, 200);
 		jumpL = new Animation();
 		jumpL.addScene(jumpingL, 200);
-
+		wizJumpR = new Animation();
+		wizJumpR.addScene(wizJumpingR, 200);
+		wizJumpL = new Animation();
+		wizJumpL.addScene(wizJumpingL, 200);
+		
+		
 		itemIcons[Item.TORSO] = newImage("/torso.png");
 		itemIcons[Item.BOOTS] = newImage("/boots.png");
 		itemIcons[Item.RING] = newImage("/ring.png");
@@ -296,6 +320,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 		equipIcons[Item.WEAPON] = newImage("/equipWep.png");
 		equipIcons[Item.PANTS] = newImage("/equipLeg.png");
 		equipIcons[Item.TORSO] = newImage("/equipTorso.png");
+		equipIcons[Item.RING] = newImage("/equipRing.png");
+		equipIcons[Item.HELM] = newImage("/equipHelm.png");
+		equipIcons[Item.GLOVES] = newImage("/equipGlove.png");
+		equipIcons[Item.BOOTS] = newImage("/equipBoot.png");
 	}
 
 	// initialise le personnage
@@ -798,14 +826,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 				}
 			}
 			
-			if(c.onLadder){
-				boolean onLadder = false;
-				for(Ladder ladder : ladders)if(ladder !=null) if(c.getArea().intersects(ladder)) onLadder = true;
+			if(c.onLadder!=null){
+				Ladder onLadder = null;
+				for(Ladder ladder : ladders)if(ladder !=null) if(c.getArea().intersects(ladder)) onLadder = ladder;
 				
 				c.onLadder = onLadder;
 			}
 			
-			if(!c.onLadder || !c.canMove)
+			if(c.onLadder==null || !c.canMove)
 			c.fall(timePassed);
 
 			for (Monster monster : monsters)
@@ -969,13 +997,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 					if (c.getYVelocity() > 0 && !down) {
 						c.setYVelocity(0);
 						c.setY(platform.getTopY() - c.getHeight());
-					} else if(c.getYVelocity() >= 0 && c.onLadder){
+					} else if(c.getYVelocity() >= 0 && c.onLadder != null){
 						boolean touchesLadder = false;
 						for(Ladder ladder : ladders)
 							if(ladder!=null)
 							if(platform.getTop().intersects(ladder.getTop()) || platform.getTop().intersects(ladder)) touchesLadder = true;
 						if(!touchesLadder){
-							c.onLadder = false;
+							c.onLadder = null;
 							c.setYVelocity(0);
 							c.setY(platform.getTopY() - c.getHeight());
 						}
@@ -1001,7 +1029,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 					if (c.getYVelocity() >= 0) {
 						c.setYVelocity(0);
 						c.setY(wall.getTopY() - c.getHeight());
-						c.onLadder = false;
+						c.onLadder = null;
 						if (!c.canMove()) {
 							c.setXVelocity(0);
 							c.canMove(true);
@@ -1074,19 +1102,33 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (c.getYVelocity() == 0) {
 			if (c.getXVelocity() > 0){
-				c.setAnimation(walkR);
+				if(c.onLadder!=null) c.setAnimation(sideClimb);
+				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkR);
+				else c.setAnimation(walkR);
 			} else if (c.getXVelocity() < 0){
-				c.setAnimation(walkL);
+				if(c.onLadder!=null) c.setAnimation(sideClimb);
+				else if(c.stats.classe == MAGE) c.setAnimation(wizWalkL);
+				else c.setAnimation(walkL);
 			} else {
-				if (c.isFacingLeft())
-					c.setAnimation(standL);
-				else
-					c.setAnimation(standR);
+				if (c.isFacingLeft()){
+					if(c.stats.classe == MAGE) c.setAnimation(wizStandL);
+					else c.setAnimation(standL);
+				} else {
+					if(c.stats.classe == MAGE) c.setAnimation(wizStandR);
+					else c.setAnimation(standR);
+				}
+				if(c.onLadder!=null) c.setAnimation(onLadder);
 			}
-		} else if (c.isFacingLeft())
-			c.setAnimation(jumpL);
-		else
-			c.setAnimation(jumpR);
+	
+			
+		} else if(c.onLadder!=null)c.setAnimation(climb); 
+		else if (c.isFacingLeft()){
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpL);
+			else c.setAnimation(jumpL);
+		} else {
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpR);
+			else c.setAnimation(jumpR);
+		}
 
 		if (!new Rectangle(0, 0, map.getXLimit(), map.getYLimit()).contains(c
 				.getArea())) {
@@ -1278,7 +1320,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 							if (c.getBase().intersects(wall.getTop())
 									&& c.getYVelocity() == 0)
 								c.jump();
-					if(c.onLadder) c.jump();
+					if(c.onLadder!=null) c.jump();
 				} else if (key == KeyEvent.VK_LEFT) {
 					c.move(LEFT);
 					c.setFacingLeft(true);
@@ -1306,7 +1348,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			
 			
 			if(c.isAlive())
-			if(!c.onLadder)
+			if(c.onLadder==null)
 			if(key<256)
 			if (activatedSkillKey == -1 && skills[SkillKeys[key]] != null)
 				if (skills[SkillKeys[key]].getLvl() > 0)
@@ -1914,15 +1956,21 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case DoubleArrow:
 			case Arrow:
 			case ExplosiveArrow:
-			case FireBall:
-			case EnergyBall:
-			case Explosion:
 				
 					Image walkleft1 = newImage("/walkleft1.png");
 					left.addScene(walkleft1, 200);
 				
 					Image walkright1 = newImage("/walkright1.png");
 					right.addScene(walkright1, 200);
+				break;
+			case FireBall:
+			case EnergyBall:
+			case Explosion:
+				Image wizStandL = newImage("/bobwalkwizzardL1.png");
+				left.addScene(wizStandL, 200);
+			
+				Image wizStandR = newImage("/bobwalkwizzardR1.png");
+				right.addScene(wizStandR, 200);
 				break;
 			}
 		}
@@ -2024,8 +2072,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case FireBall:
 				Image fireBall = newImage("/fireball.png");
 				Image fireBall2 = newImage("/fireball2.png");
-				a.addScene(fireBall, 200);
-				a.addScene(fireBall2, 200);
+				a.addScene(fireBall, 100);
+				a.addScene(fireBall2, 00);
 				return a;
 			}
 			return null;
@@ -2191,7 +2239,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		public int skill;
 		private int[] statBonus = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0 };
+				0, 0, 0, 0, 0, 0, 0 };
 
 		public PassiveSkill(int i) {
 			skill = i;
@@ -2243,7 +2291,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		private int[] skillKeys = new int[256];
 		private boolean usingSkill = false;
 		private boolean alive = true;
-		public boolean onLadder = false;
+		public Ladder onLadder = null;
 		public int pressingClimb;
 		private Clip hitSound, dieSound;
 
@@ -2306,7 +2354,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 		public void setClimbing(int i){
 			if(canMove)
-			if(onLadder)setYVelocity(-i*0.4f);
+			if(onLadder!=null)setYVelocity(-i*0.4f);
 		}
 		
 		public void isPressingClimb(int i){
@@ -2316,8 +2364,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public void climb(int i){
 			if(canMove()){
 			for(Ladder ladder : ladders) if(ladder!=null)
-				if(c.getArea().intersects(ladder)) c.onLadder = true;
-				if(c.onLadder) c.setClimbing(i);
+				if(c.getArea().intersects(ladder)) c.onLadder = ladder;
+				if(c.onLadder != null) c.setClimbing(i);
 			}
 		}
 		
@@ -2537,14 +2585,14 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// saute
 		public void jump() {
-			onLadder = false;
+			onLadder = null;
 			setYVelocity(-1.5f);
 		}
 
 		// update la mana, l'invincibilité et le mouvement du personnage
 		public void update(long timePassed) {
 			
-			if(!onLadder)
+			if(onLadder==null)
 			if(pressingClimb != 0){
 				c.climb(pressingClimb);
 			}
@@ -2562,6 +2610,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				setXVelocity(dir * 0.38f);
 			if (usingSkill && getYVelocity() == 0)
 				setXVelocity(0);
+			
+			if(onLadder != null)
+			if(onLadder.fixedX){
+				setX((float)(onLadder.getX()+onLadder.getWidth()/2-getWidth()/2));
+				setXVelocity(0);
+			}
 			
 			if(stats.classe == MAGE){
 			if (stats.mana < maxMana)
@@ -2611,7 +2665,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		// retourne/change si le personnage peut bouger
 		public boolean canMove() {
-			if(onLadder) return true;
+			if(onLadder!=null) return true;
 			return canMove;
 		}
 
@@ -2635,7 +2689,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if(stats.exp < 0) stats.exp = 0;
 				if(dieSound != null) dieSound.start();
 			} else if(hitSound!= null) hitSound.start();
-			onLadder = false;
+			onLadder = null;
 			}
 		}
 
@@ -3186,7 +3240,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				platforms[3] = new Platform(2450,550,Xlimit-2450);
 				platforms[4] = new Platform(515,1455,775-515);
 				ladders[0] = new Ladder(0,platforms[0],460,1260);
-				spots[0] = new Spot(new Point(0,340), new Point(1500-105,525-200), 0, new Point(220,0));
+				spots[0] = new Spot(new Point(0,340), new Point(1500-125,525-200), 0, new Point(220,0));
 				spots[1] = new Spot(new Point(2450+450,550-200), new Point(5,5000-240),2,new Point(0,5000-910));
 				background = newImage("/map1.jpg");
 				monsters[0] = new Monster(COBRA, new Point(850,540-60));
@@ -3206,7 +3260,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spawnPoint = new Point(5,5000-240);
 				spawnCamera = new Point(0,5000-910);
 				
-				spots[0] = new Spot(new Point(0,5000-240), new Point(2450+450,550-200), 1, new Point(3000-1280,0));
+				spots[0] = new Spot(new Point(0,5000-240), new Point(2450+430,550-200), 1, new Point(3000-1280,0));
 				walls[4] = new Wall(0,Ylimit-40,Xlimit,40);
 				walls[5] = new Wall(1580,4012,2000-1580,4035-4012);
 				walls[6] = new Wall(103,2483,201-103,2658-2483);
@@ -3238,13 +3292,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				background = newImage("/map2.jpg");
 				ladders[0] = new Ladder(987,platforms[1],100,4415-4020);
 				ladders[1] = new Ladder(945,4120,125,540);
-				ladders[2] = new Ladder(1220,platforms[2],1337-1220,4100-3870);
-				ladders[3] = new Ladder(1850,platforms[3],25,4012-3860);
+				ladders[2] = new Ladder(1200,platforms[2],1337-1220,4100-3870);
+				ladders[3] = new Ladder(1825,platforms[3],0,4012-3860);
 				ladders[4] = new Ladder(815,platforms[6],971-815,3773-3341);
-				ladders[5] = new Ladder(496,2817,25,3185-2830);
-				ladders[6] = new Ladder(350,platforms[8],25,2800-2620);
+				ladders[5] = new Ladder(502,2817,0,3185-2830);
+				ladders[6] = new Ladder(337,platforms[8],0,2800-2600);
 				ladders[7] = new Ladder(804,2350,1110-804,2600-2350);
-				spots[1] = new Spot(new Point(Xlimit-125,4009-200), new Point(25,830-200),3, new Point(0,0));
+				spots[1] = new Spot(new Point(Xlimit-115,4009-200), new Point(25,830-200),3, new Point(0,0));
 				break;
 			case 3:
 				Xlimit = 3000;
