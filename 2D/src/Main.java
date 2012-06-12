@@ -2878,7 +2878,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public void update(long timePassed) {
 			if (alive) {
 				regen+= timePassed;
-				if(regen >= 30000/maxLife+300){
+				if(regen >= 40000/maxLife+200){
 					if(life < maxLife)
 					life++;
 					regen=0;
