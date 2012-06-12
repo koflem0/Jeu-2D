@@ -1123,10 +1123,10 @@ public class Main extends Core implements KeyListener, MouseListener,
 			
 		} else if(c.onLadder!=null)c.setAnimation(climb); 
 		else if (c.isFacingLeft()){
-			if(c.stats.classe == MAGE) c.setAnimation(wizJumpR);
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpL);
 			else c.setAnimation(jumpL);
 		} else {
-			if(c.stats.classe == MAGE) c.setAnimation(wizJumpL);
+			if(c.stats.classe == MAGE) c.setAnimation(wizJumpR);
 			else c.setAnimation(jumpR);
 		}
 
@@ -1956,15 +1956,21 @@ public class Main extends Core implements KeyListener, MouseListener,
 			case DoubleArrow:
 			case Arrow:
 			case ExplosiveArrow:
-			case FireBall:
-			case EnergyBall:
-			case Explosion:
 				
 					Image walkleft1 = newImage("/walkleft1.png");
 					left.addScene(walkleft1, 200);
 				
 					Image walkright1 = newImage("/walkright1.png");
 					right.addScene(walkright1, 200);
+				break;
+			case FireBall:
+			case EnergyBall:
+			case Explosion:
+				Image wizStandL = newImage("/bobwalkwizzardL1.png");
+				left.addScene(wizStandL, 200);
+			
+				Image wizStandR = newImage("/bobwalkwizzardR1.png");
+				right.addScene(wizStandR, 200);
 				break;
 			}
 		}
@@ -3287,12 +3293,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				ladders[0] = new Ladder(987,platforms[1],100,4415-4020);
 				ladders[1] = new Ladder(945,4120,125,540);
 				ladders[2] = new Ladder(1200,platforms[2],1337-1220,4100-3870);
-				ladders[3] = new Ladder(1850,platforms[3],5,4012-3860, true);
+				ladders[3] = new Ladder(1825,platforms[3],0,4012-3860);
 				ladders[4] = new Ladder(815,platforms[6],971-815,3773-3341);
-				ladders[5] = new Ladder(505,2817,5,3185-2830, true);
-				ladders[6] = new Ladder(340,platforms[8],5,2800-2500, true);
+				ladders[5] = new Ladder(502,2817,0,3185-2830);
+				ladders[6] = new Ladder(337,platforms[8],0,2800-2600);
 				ladders[7] = new Ladder(804,2350,1110-804,2600-2350);
-				spots[1] = new Spot(new Point(Xlimit-125,4009-200), new Point(25,830-200),3, new Point(0,0));
+				spots[1] = new Spot(new Point(Xlimit-115,4009-200), new Point(25,830-200),3, new Point(0,0));
 				break;
 			case 3:
 				Xlimit = 3000;
