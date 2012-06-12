@@ -2663,6 +2663,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 					timer = 0;
 				}
 			}
+			
+			if(!canMove && inWater) canMove = true;
+			
 			if (canMove())
 				if(inWater) setXVelocity(dir*0.29f);
 				else setXVelocity(dir * 0.38f);
@@ -3243,7 +3246,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 						vx = -vx;
 					c.setXVelocity(vx);
 					c.setYVelocity(-0.5f);
-					if(!c.inWater)
 					c.canMove(false);
 				}
 				c.setInvincible(1000);
