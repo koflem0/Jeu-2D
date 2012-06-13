@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.sound.sampled.AudioInputStream;
@@ -23,6 +24,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 			CRITDMG = 5, MASTERY = 6, ALLSTATS = 7, DEFENSE = 19, WATK = 20;
 	public static final int MAGE = 2, FIGHTER = 0, ARCHER = 1;
 	public static final int COBRA = 0, BIGCOBRA = 1, COC = 2, VERYBIGCOBRA = 3;
+	public static final int walkL = 0, walkR = 1, standL = 2, standR = 3, jumpR = 4, jumpL = 5, climb = 6, onLadder = 7, sideClimb = 8,
+			wizWalkL = 9, wizWalkR = 10, wizStandL = 11, wizStandR = 12, wizJumpL = 13, wizJumpR = 14;
 
 	public static void main(String[] args) {
 		Main m = new Main();
@@ -31,7 +34,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	public Skill[] skills = new Skill[20];
 	public PassiveSkill[] passives = new PassiveSkill[10];
-	private Spot[] spots = new Spot[3];
 	private int counter = 0;
 	private float X = 0, Y = 0;
 	public boolean down = false, blink = false, playing = false,
@@ -39,21 +41,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private Character c;
 	private Image bg, spotImage;
 	private Image[] itemIcons = new Image[8], equipIcons = new Image[8];
-	private Animation walkL, walkR, standL, standR, jumpR, jumpL, climb, onLadder, sideClimb
-						, wizWalkL, wizWalkR, wizStandL, wizStandR, wizJumpL, wizJumpR;
-	private Platform[] platforms;
-	private Wall[] walls;
-	private Ladder[] ladders;
+	private Animation[] charAnims = new Animation[15];
+
+	private ArrayList<Platform> platforms;
+	private ArrayList<Wall> walls;
+	private ArrayList<Ladder> ladders;
+	private ArrayList<Spot> spots;
 	private Rectangle[] water;
 	private Map map;
-	private Monster[] monsters;
-	private FlyingText[] damage = new FlyingText[20];
+	private ArrayList<Monster> monsters;
+	
 	private int currentSkill = -1;
 	private int activatedSkillKey = -1;
 	private int[] SkillKeys = new int[256];
 	private Clip clip = null;
-	private Projectile[] projectiles = new Projectile[12];
-	private Effect[] effects = new Effect[8];
 	private StatMenu statMenu = new StatMenu();
 	private int gameSlot;
 	private SaveMenu mainMenu = new SaveMenu();
@@ -70,8 +71,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 	private Item draggedItem;
 	private int previousItemI = -1, previousItemJ = -1, previousItemP = -1;
 	private Point draggedItemLocation;
-
-	private Drop[] drops = new Drop[50];
+	
+	private ArrayList<FlyingText> damage = new ArrayList<FlyingText>();
+	private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+	private ArrayList<Effect> effects = new ArrayList<Effect>();
+	private ArrayList<Drop> drops = new ArrayList<Drop>();
 
 	// initialise la fenêtre
 	public void init() {
@@ -225,15 +229,17 @@ public class Main extends Core implements KeyListener, MouseListener,
 						drop(m);
 				} else if(m.hitSound != null) m.hitSound.start();
 				}
-				boolean hit = false;
 
-				for (int j = 0; j < damage.length && hit == false; j++) {
-					if (damage[j] == null)
-						damage[j] = new FlyingText();
-					if (!damage[j].isActive()) {
-						damage[j] = new FlyingText(dmg, m,crit);
-						hit = true;
-					}
+
+				boolean created = false;
+				for (int i = 0; !created; i++) {
+					if(damage.size() <= i){
+						damage.add(new FlyingText(dmg, m, crit));
+						created = true;
+					} else if (!damage.get(i).isActive()) {
+							damage.set(i,new FlyingText(dmg, m, crit));
+							created = true;
+						}
 				}
 				
 				if(dmg > m.getMaxLife() / 50 && m.canMove){
@@ -299,7 +305,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 	}
 
 	// retourne les monstres sur la map actuelle
-	public Monster[] getMonsters() {
+	public ArrayList<Monster> getMonsters() {
 		return monsters;
 	}
 
@@ -349,45 +355,45 @@ public class Main extends Core implements KeyListener, MouseListener,
 		jumpingL = newImage("/walkleft2.png"), wizJumpingL = newImage("/bobwalkwizzardL2.png"),
 		standingladder = newImage("/bobclimb1.png");
 		
-		walkR = new Animation(); wizWalkR = new Animation();
-		walkL = new Animation(); wizWalkL = new Animation();
-		climb = new Animation();
+		charAnims[walkR] = new Animation(); charAnims[wizWalkR] = new Animation();
+		charAnims[walkL] = new Animation(); charAnims[wizWalkL] = new Animation();
+		charAnims[climb] = new Animation();
 		for (int i = 1; i <= 3; i++) {
-			climb.addScene(newImage("/bobclimb" + i + ".png"), 120);
-			walkR.addScene(newImage("/walkright" + i + ".png"), 150); 
-			wizWalkR.addScene(newImage("/bobwalkwizzardR" + i + ".png"), 150);
-			walkL.addScene(newImage("/walkleft" + i + ".png"), 150); 
-			wizWalkL.addScene(newImage("/bobwalkwizzardL" + i + ".png"), 150);
+			charAnims[climb].addScene(newImage("/bobclimb" + i + ".png"), 120);
+			charAnims[walkR].addScene(newImage("/walkright" + i + ".png"), 150); 
+			charAnims[wizWalkR].addScene(newImage("/bobwalkwizzardR" + i + ".png"), 150);
+			charAnims[walkL].addScene(newImage("/walkleft" + i + ".png"), 150); 
+			charAnims[wizWalkL].addScene(newImage("/bobwalkwizzardL" + i + ".png"), 150);
 			if (i == 2) {
-				climb.addScene(newImage("/bobclimb" + 1 + ".png"), 120);
-				walkR.addScene(newImage("/walkright" + 1 + ".png"), 150);
-				wizWalkR.addScene(newImage("/bobwalkwizzardR" + 1 + ".png"), 150);
-				walkL.addScene(newImage("/walkleft" + 1 + ".png"), 150);
-				wizWalkL.addScene(newImage("/bobwalkwizzardL" + 1 + ".png"), 150);
+				charAnims[climb].addScene(newImage("/bobclimb" + 1 + ".png"), 120);
+				charAnims[walkR].addScene(newImage("/walkright" + 1 + ".png"), 150);
+				charAnims[wizWalkR].addScene(newImage("/bobwalkwizzardR" + 1 + ".png"), 150);
+				charAnims[walkL].addScene(newImage("/walkleft" + 1 + ".png"), 150);
+				charAnims[wizWalkL].addScene(newImage("/bobwalkwizzardL" + 1 + ".png"), 150);
 			}
 		}
 		
-		sideClimb = new Animation();
-		sideClimb.addScene(newImage("/bobclimbL1.png"), 160);
-		sideClimb.addScene(newImage("/bobclimbL2.png"), 160);
-		onLadder = new Animation();
-		onLadder.addScene(standingladder, 200);
-		standL = new Animation();
-		standL.addScene(standingL, 200);
-		standR = new Animation();
-		standR.addScene(standingR, 200);
-		wizStandL = new Animation();
-		wizStandL.addScene(wizStandingL,200);
-		wizStandR = new Animation();
-		wizStandR.addScene(wizStandingR,200);
-		jumpR = new Animation();
-		jumpR.addScene(jumpingR, 200);
-		jumpL = new Animation();
-		jumpL.addScene(jumpingL, 200);
-		wizJumpR = new Animation();
-		wizJumpR.addScene(wizJumpingR, 200);
-		wizJumpL = new Animation();
-		wizJumpL.addScene(wizJumpingL, 200);
+		charAnims[sideClimb] = new Animation();
+		charAnims[sideClimb].addScene(newImage("/bobclimbL1.png"), 160);
+		charAnims[sideClimb].addScene(newImage("/bobclimbL2.png"), 160);
+		charAnims[onLadder] = new Animation();
+		charAnims[onLadder].addScene(standingladder, 200);
+		charAnims[standL] = new Animation();
+		charAnims[standL].addScene(standingL, 200);
+		charAnims[standR] = new Animation();
+		charAnims[standR].addScene(standingR, 200);
+		charAnims[wizStandL] = new Animation();
+		charAnims[wizStandL].addScene(wizStandingL,200);
+		charAnims[wizStandR] = new Animation();
+		charAnims[wizStandR].addScene(wizStandingR,200);
+		charAnims[jumpR] = new Animation();
+		charAnims[jumpR].addScene(jumpingR, 200);
+		charAnims[jumpL] = new Animation();
+		charAnims[jumpL].addScene(jumpingL, 200);
+		charAnims[wizJumpR] = new Animation();
+		charAnims[wizJumpR].addScene(wizJumpingR, 200);
+		charAnims[wizJumpL] = new Animation();
+		charAnims[wizJumpL].addScene(wizJumpingL, 200);
 		
 		
 		itemIcons[Item.TORSO] = newImage("/torso.png");
@@ -972,19 +978,16 @@ public class Main extends Core implements KeyListener, MouseListener,
 			c.update(timePassed);
 
 			for (Projectile projectile : projectiles) {
-				if (projectile != null)
 					if (projectile.isActive())
 						projectile.update(timePassed);
 			}
 
 			for (Drop drop : drops) {
-				if (drop != null)
 					if (drop.isActive())
 						drop.update(timePassed);
 			}
 
 			for (Effect effect : effects) {
-				if (effect != null)
 					if (effect.isActive())
 						effect.update(timePassed);
 			}
@@ -993,7 +996,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	public void testProjectiles() {
 		for (Projectile projectile : projectiles) {
-			if (projectile != null)
 				if (projectile.isActive()) {
 					Monster m = testProjectile(projectile);
 
@@ -1102,7 +1104,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 		
 
 		for (Platform platform : platforms) {
-			if (platform != null)
 				if (c.getBase().intersects(platform.getTop())) {
 
 					if (!c.canMove() && c.getYVelocity() >= 0) {
@@ -1115,7 +1116,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 					} else if(c.getYVelocity() >= 0 && c.onLadder != null){
 						boolean touchesLadder = false;
 						for(Ladder ladder : ladders)
-							if(ladder!=null)
 							if(platform.getTop().intersects(ladder.getTop()) || platform.getTop().intersects(ladder)) touchesLadder = true;
 						if(!touchesLadder){
 							c.onLadder = null;
@@ -1127,7 +1127,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 
 		for (Wall wall : walls) {
-			if (wall != null) {
 				if (c.getXVelocity() < 0
 						&& c.getLeftSide().intersects(wall.getSide())) {
 					c.setX(wall.getX() + wall.getWidth() - 2);
@@ -1159,12 +1158,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 					}
 				}
 				for (Projectile projectile : projectiles) {
-					if (projectile != null)
 						if (projectile.isActive())
 							if (projectile.getArea().intersects(wall.getArea()))
 								projectile.delete();
 				}
-			}
+			
 		}
 
 		for (Monster monster : monsters) {
@@ -1196,14 +1194,15 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if (monster != null)
 					if (monster.isAlive())
 						if (c.getArea().intersects(monster.getArea())) {
-							boolean didHit = false;
-							for (int i = 0; i < damage.length && !didHit; i++) {
-								if (damage[i] == null)
-									damage[i] = new FlyingText();
-								if (!damage[i].isActive()) {
-									damage[i] = new FlyingText(monster.hit(c), c);
-									didHit = true;
-								}
+							boolean created = false;
+							for (int i = 0; !created; i++) {
+								if(damage.size() <= i){
+									damage.add(new FlyingText(monster.hit(c), c));
+									created = true;
+								} else if (!damage.get(i).isActive()) {
+										damage.set(i,new FlyingText(monster.hit(c), c));
+										created = true;
+									}
 							}
 						}
 
@@ -1361,46 +1360,40 @@ public class Main extends Core implements KeyListener, MouseListener,
 	// rajoute ou enleve un projectile
 	public void add(Projectile projectile) {
 		boolean created = false;
-		for (int i = 0; i < projectiles.length && !created; i++) {
-			if (projectiles[i] != null) {
-				if (!projectiles[i].isActive()) {
-					projectiles[i] = projectile;
+		for (int i = 0; !created; i++) {
+			if(projectiles.size() <= i){
+				projectiles.add(projectile);
+				created = true;
+			} else if (!projectiles.get(i).isActive()) {
+					projectiles.set(i,projectile);
 					created = true;
 				}
-			} else {
-				projectiles[i] = projectile;
-				created = true;
-			}
 		}
 	}
 
 	public void add(Effect effet) {
 		boolean created = false;
-		for (int i = 0; i < effects.length && !created; i++) {
-			if (effects[i] != null) {
-				if (!effects[i].isActive()) {
-					effects[i] = effet;
+		for (int i = 0; !created; i++) {
+			if(effects.size() <= i){
+				effects.add(effet);
+				created = true;
+			} else if (!effects.get(i).isActive()) {
+					effects.set(i,effet);
 					created = true;
 				}
-			} else {
-				effects[i] = effet;
-				created = true;
-			}
 		}
 	}
 
 	public void add(Drop drop) {
 		boolean created = false;
-		for (int i = 0; i < drops.length && !created; i++) {
-			if (drops[i] != null) {
-				if (!drops[i].isActive()) {
-					drops[i] = drop;
+		for (int i = 0; !created; i++) {
+			if(drops.size() <= i){
+				drops.add(drop);
+				created = true;
+			} else if (!drops.get(i).isActive()) {
+					drops.set(i,drop);
 					created = true;
 				}
-			} else {
-				drops[i] = drop;
-				created = true;
-			}
 		}
 	}
 
@@ -1454,9 +1447,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 					c.setFacingLeft(false);
 				} else if (key == KeyEvent.VK_UP) {
 					boolean teleported = false;
-					for (int i = 0; i < spots.length; i++)
-						if(spots[i]!=null)
-						if (c.getArea().intersects(spots[i].getArea())
+					for (int i = 0; i < spots.size(); i++)
+						if (c.getArea().intersects(spots.get(i).getArea())
 								&& !teleported) {
 							teleported = true;
 							loadNextMap(i);
@@ -2344,13 +2336,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 			monsters = getMonsters();
 			int hits = 1;
 
-			for (int i = 0; i < monsters.length
+			for (int i = 0; i < monsters.size()
 					&& hits <= getMaxEnemiesHit(); i++) {
-				if (monsters[i] != null)
-					if (monsters[i].isAlive())
-						if (monsters[i].getArea().intersects(getArea())) {
-							damageMonster(monsters[i],
-									c.getDamage(monsters[i],
+					if (monsters.get(i).isAlive())
+						if (monsters.get(i).getArea().intersects(getArea())) {
+							damageMonster(monsters.get(i),
+									c.getDamage(monsters.get(i),
 										getDmgMult(hit)),
 										getKBSpeed(hit));
 							if(manaUsed < 0) { 
@@ -2428,6 +2419,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 		public int pressingClimb;
 		private Clip hitSound, dieSound;
 		public boolean inWater;
+		public int currentAnimation;
 		
 		public Character(int classe) {
 			super();
@@ -2475,7 +2467,12 @@ public class Main extends Core implements KeyListener, MouseListener,
 				break;
 			}
 		}
-
+		
+		public void setAnimation(int i){
+			super.setAnimation(charAnims[i]);
+			currentAnimation = i;
+		}
+		
 		public String getResourceName(){
 			String info = "";
 			switch(c.stats.classe){
