@@ -1906,11 +1906,11 @@ public class Main extends Core implements KeyListener, MouseListener,
 				break;
 			case Explosion:
 				manaUsed = 15;
-				dmgMult[0] = 1.13f + 0.07f * c.stats.skillLvls[skill];
+				dmgMult[0] = 1.18f + 0.06f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
 				maxEnemiesHit = 4+(int)(c.stats.skillLvls[skill] * 0.5f);
-				hitTime[0] = 300;
-				skillTime = 500;
+				hitTime[0] = 200;
+				skillTime = 400;
 				break;
 			}
 		}
@@ -2846,24 +2846,20 @@ public class Main extends Core implements KeyListener, MouseListener,
 				timer = 30000;
 				exp = 14;
 				lvl = 4;
-				rarechance = 15;
-				dropchance = 25;
 				dropamount = 1;
 				avoid = 20;
 				name ="VBig Cobra";
 				break;
 			case COC:
-				atk = 22;
+				atk = 28;
 				def = 15;
 				mastery = 70;
 				spd = -0.37f;
 				maxLife = 62;
 				timer = 24000;
-				exp = 23;
+				exp = 21;
 				lvl = 6;
-				dropchance = 28;
 				dropamount = 1;
-				rarechance = 19;
 				avoid = 14;
 				name ="Beetle";
 				break;
