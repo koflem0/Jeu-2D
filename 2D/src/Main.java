@@ -1924,7 +1924,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				break;
 			case Explosion:
 				manaUsed = 10 + c.stats.skillLvls[skill];
-				dmgMult[0] = 0.73f + 0.07f * c.stats.skillLvls[skill];
+				dmgMult[0] = 0.83f + 0.07f * c.stats.skillLvls[skill];
 				KBSpeed[0] = 0.17f;
 				maxEnemiesHit = 3+(int)(c.stats.skillLvls[skill] * 0.5f);
 				hitTime[0] = 400;
@@ -2852,47 +2852,45 @@ public class Main extends Core implements KeyListener, MouseListener,
 				timer = 12000;
 				exp = 4;
 				lvl = 1;
-				avoid = 0;
+				avoid = 7;
 				name = "Cobra";
 				break;
 			case BIGCOBRA:
-				atk = 20;
-				def = 7;
+				atk = 22;
+				def = 5;
 				mastery = 65;
 				spd = -0.35f;
-				maxLife = 29;
+				maxLife = 25;
 				timer = 30000;
-				exp = 11;
+				exp = 9;
 				lvl = 3;
 				dropchance = 20;
 				dropamount = 1;
-				avoid = 9;
+				avoid = 12;
 				name = "Big Cobra";
 				break;
 			case VERYBIGCOBRA:
-				atk = 28;
-				def = 9;
+				atk = 35;
+				def = 8;
 				mastery = 50;
 				spd = -0.40f;
-				maxLife = 50;
+				maxLife = 41;
 				timer = 30000;
-				exp = 20;
-				lvl = 5;
-				rarechance = 15;
-				dropchance = 25;
+				exp = 14;
+				lvl = 4;
 				dropamount = 1;
-				avoid = 11;
+				avoid = 20;
 				name ="VBig Cobra";
 				break;
 			case COC:
-				atk = 22;
-				def = 19;
+				atk = 28;
+				def = 15;
 				mastery = 70;
 				spd = -0.37f;
-				maxLife = 99;
+				maxLife = 62;
 				timer = 24000;
-				exp = 23;
-				lvl = 7;
+				exp = 21;
+				lvl = 6;
 				dropchance = 24;
 				dropamount = 1;
 				rarechance = 14;
@@ -3448,6 +3446,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				Xlimit = 3000;
 				Ylimit = 910;
 				spots[0] = new Spot(new Point(25,Ylimit-260), new Point(2000-125,4009-200), 2, new Point(2000-1280,3985-710));
+				spots[1] = new Spot(new Point(2880,630), new Point(25,700), 4, new Point(0,1000-910));
 				platforms[0] = new Platform(880,343,1185-880);
 				platforms[1] = new Platform(1297,393,1650-1297);
 				platforms[2] = new Platform(1757,335,1893-1757);
@@ -3468,6 +3467,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				walls[4] = new Wall(0,Ylimit-60,Xlimit,40);
 				walls[5] = new Wall(2100,440,2571-2100,819-440);
 				break;
+			case 4:
+				Xlimit = 4000;
+				Ylimit = 1000;
+				background = newImage("/map4.png");
+				walls[4] = new Wall(0,Ylimit-30,Xlimit,40);
+				spots[0] = new Spot(new Point(25,Ylimit-230), new Point(2880,630), 3, new Point(3000-1280,0));
+				
 			}
 			limitWalls();
 		}
