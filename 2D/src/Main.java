@@ -3412,6 +3412,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				Xlimit = 3000;
 				Ylimit = 910;
 				spots[0] = new Spot(new Point(25,Ylimit-260), new Point(2000-125,4009-200), 2, new Point(2000-1280,3985-710));
+				spots[1] = new Spot(new Point(2880,630), new Point(25,700), 4, new Point(0,1000-910));
 				platforms[0] = new Platform(880,343,1185-880);
 				platforms[1] = new Platform(1297,393,1650-1297);
 				platforms[2] = new Platform(1757,335,1893-1757);
@@ -3432,6 +3433,13 @@ public class Main extends Core implements KeyListener, MouseListener,
 				walls[4] = new Wall(0,Ylimit-60,Xlimit,40);
 				walls[5] = new Wall(2100,440,2571-2100,819-440);
 				break;
+			case 4:
+				Xlimit = 4000;
+				Ylimit = 1000;
+				background = newImage("/map4.png");
+				walls[4] = new Wall(0,Ylimit-30,Xlimit,40);
+				spots[0] = new Spot(new Point(25,Ylimit-230), new Point(2880,630), 3, new Point(3000-1280,0));
+				
 			}
 			limitWalls();
 		}
