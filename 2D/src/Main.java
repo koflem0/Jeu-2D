@@ -3443,6 +3443,9 @@ public class Main extends Core implements KeyListener, MouseListener,
 				spots[1] = new Spot(new Point(Xlimit-115,4009-200), new Point(25,830-200),3, new Point(0,0));
 				break;
 			case 3:
+				
+				spawnPoint = new Point(5,Ylimit-265);
+				spawnCamera = new Point(0,0);
 				Xlimit = 3000;
 				Ylimit = 910;
 				spots[0] = new Spot(new Point(25,Ylimit-260), new Point(2000-125,4009-200), 2, new Point(2000-1280,3985-710));
@@ -3468,6 +3471,8 @@ public class Main extends Core implements KeyListener, MouseListener,
 				walls[5] = new Wall(2100,440,2571-2100,819-440);
 				break;
 			case 4:
+				spawnPoint = new Point(5,Ylimit-235);
+				spawnCamera = new Point(0,0);
 				Xlimit = 4000;
 				Ylimit = 1000;
 				background = newImage("/map4.png");
