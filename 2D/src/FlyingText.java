@@ -6,7 +6,7 @@ public class FlyingText extends Sprite {
 	
 	private String text;
 	private Main.Character c = null;
-	private Main.Monster m = null;
+	private Monster m = null;
 	private float moveUp = 0;
 	private boolean active;
 	private Color color = Color.YELLOW;
@@ -24,7 +24,7 @@ public class FlyingText extends Sprite {
 		 active = false;
 	 }
 	 
-	 public FlyingText(int t, Main.Monster m, boolean crit){
+	 public FlyingText(int t, Monster m, boolean crit){
 		 if(crit) color = Color.RED;
 		 text = ""+t;
 		 if(t == 0) {

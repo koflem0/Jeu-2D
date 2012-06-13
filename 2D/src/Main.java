@@ -203,6 +203,85 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 		return stats;
 	}
+	
+	// endommage un monstre et le fait reculer
+			public void damageMonster(Monster m, int dmg, float speed) {
+				
+				boolean crit = false;
+				Random rand = new Random();
+				if ((rand.nextInt(100) + 1) < c.getCritChance()) {
+					dmg = dmg * (c.getCritDamage() + 100) / 100;
+					crit = true;
+				}
+
+				if (dmg > 0) {
+					m.life -= dmg;
+					m.isAggro = true; m.aggroTimer = 5000;
+				if (m.life <= 0){
+					m.die();
+					if(m.getLevel() >= c.stats.lvl-5)
+						c.exp(m.getExp());
+					for (int i = 0; i < m.getdropamount(); i++)
+						drop(m);
+				} else if(m.hitSound != null) m.hitSound.start();
+				}
+				boolean hit = false;
+
+				for (int j = 0; j < damage.length && hit == false; j++) {
+					if (damage[j] == null)
+						damage[j] = new FlyingText();
+					if (!damage[j].isActive()) {
+						damage[j] = new FlyingText(dmg, m,crit);
+						hit = true;
+					}
+				}
+				
+				if(dmg > m.getMaxLife() / 50 && m.canMove){
+				m.canMove = false;
+				m.cantMoveTime = (long) (105 + speed * 1100);
+				m.setYVelocity(-(speed * 3));
+				if ((c.getX() + c.getWidth() / 2) > (m.getX() + m.getWidth() / 2))
+					speed = -speed;
+				m.setXVelocity(speed);
+				}
+			}
+			
+		private void drop(Monster m) {
+
+			Random rand = new Random();
+			int rarity = rand.nextInt(100);
+
+			if ((rand.nextInt(100)) < m.getdropchance()) {
+
+				if (rarity < m.getrarechance())
+					rarity = Item.RARE;
+				else if (rarity < (int)(m.getrarechance() * 4.5))
+					rarity = Item.MAGIC;
+				else
+					rarity = Item.COMMON;
+
+				int itemChoices = 8;
+				if (rarity == Item.COMMON)
+						itemChoices = 6;
+					
+				int dropLvl = rand.nextInt(10);
+				if(dropLvl <= 3) dropLvl = m.getLevel(); else if(dropLvl <= 5) dropLvl = m.getLevel()+1; else dropLvl = m.getLevel()-1;
+					
+				if(dropLvl < 1)dropLvl = 1;
+					
+				add(new Drop(new Item(dropLvl, rand.nextInt(itemChoices), rarity),
+						new Point(m.getX() + rand.nextInt(m.getWidth() >= 50 ? m.getWidth() - 50 : 1),
+								m.getY() + m.getHeight() - 50)));
+			}
+		}
+	
+	
+	public boolean isFacingChar(Monster m){
+		if(c.getY()+c.getHeight() > m.getY()){
+			if((m.getXVelocity() > 0 && c.getX() > m.getX()) || (m.getXVelocity() < 0 && c.getX() < m.getX())) return true;
+		}
+		return false;
+	}
 
 	// retourne les limites de la map actuelle
 	public int getMapXLimit() {
@@ -348,7 +427,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 		if (playing) {
 			drawBackGround(g);
-
 			drawSpots(g);
 			drawDrops(g);
 			drawMonsters(g);
@@ -944,7 +1022,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 						} else {
 
-							m.damage(c.getDamage(m, projectile.skill
+							damageMonster(m,c.getDamage(m, projectile.skill
 									.getDmgMult(projectile.number)),
 									projectile.skill
 											.getKBSpeed(projectile.number));
@@ -1205,7 +1283,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 			
 		if (turn) {
 			if (m.canMove()) {
-				if(m.isAggro && m.isFacingChar() && !facingwall && m.getYVelocity()==0){ 
+				if(m.isAggro && isFacingChar(m) && !facingwall && m.getYVelocity()==0){ 
 					m.jump();
 				}else{
 				m.setXVelocity(-m.getXVelocity());
@@ -2271,7 +2349,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 				if (monsters[i] != null)
 					if (monsters[i].isAlive())
 						if (monsters[i].getArea().intersects(getArea())) {
-							monsters[i].damage(
+							damageMonster(monsters[i],
 									c.getDamage(monsters[i],
 										getDmgMult(hit)),
 										getKBSpeed(hit));
@@ -2821,478 +2899,7 @@ public class Main extends Core implements KeyListener, MouseListener,
 
 	}
 
-	public class Monster extends Sprite {
-
-		public static final int DMG = 0, SPD = 1, DEF = 2; 
-		
-		private long cantMoveTime;
-		private int atk, def, mastery, life, maxLife, exp, lvl,
-				dropchance = 13, rarechance = 8, dropamount = 1,
-				avoid;
-		private float spd, allStatsMultiplier = 1;
-		private float[] statMultipliers = {1,1,1,1,1,1,1,1,1,1};
-		private boolean facingLeft = true, canMove = true, alive = false, isAggro = false, elite = false;
-		private Image[] monstreD = new Image[8],monstreG = new Image[5];
-		private Image monstreHitD, monstreHitL;
-		private Animation hitLeft, hitRight, left, right;
-		private Clip hitSound, dieSound;
-		private Point spawnPoint;
-		private long timer, deathTimer = 200, regen = 0, aggroTimer = 5000;
-		public String name, eliteType = "";
-
-		public Monster(int i, Point spawn) {
-			getAnimations(i);
-			switch (i) {
-			case COBRA:
-				atk = 12;
-				def = 2;
-				mastery = 50;
-				spd = -0.240f;
-				maxLife = 13;
-				timer = 12000;
-				exp = 4;
-				lvl = 1;
-				avoid = 7;
-				name = "Cobra";
-				break;
-			case BIGCOBRA:
-				atk = 22;
-				def = 5;
-				mastery = 65;
-				spd = -0.35f;
-				maxLife = 25;
-				timer = 30000;
-				exp = 9;
-				lvl = 3;
-				dropchance = 20;
-				dropamount = 1;
-				avoid = 12;
-				name = "Big Cobra";
-				break;
-			case VERYBIGCOBRA:
-				atk = 35;
-				def = 8;
-				mastery = 50;
-				spd = -0.40f;
-				maxLife = 41;
-				timer = 30000;
-				exp = 14;
-				lvl = 4;
-				dropamount = 1;
-				avoid = 20;
-				name ="VBig Cobra";
-				break;
-			case COC:
-				atk = 28;
-				def = 15;
-				mastery = 70;
-				spd = -0.37f;
-				maxLife = 62;
-				timer = 24000;
-				exp = 21;
-				lvl = 6;
-				dropchance = 24;
-				dropamount = 1;
-				rarechance = 14;
-				avoid = 12;
-				name ="Beetle";
-				break;
-			}
-			this.spawnPoint = spawn;
-		}
-
-		// initialise le monstre
-		public void init() {
-			randomElite();
-			life = getMaxLife();
-			alive = true;
-			setXVelocity(spd);
-			setX((float) spawnPoint.getX());
-			setY((float) spawnPoint.getY());
-		}
-
-		public void randomElite(){
-			Random rand = new Random();
-			if(1 > rand.nextInt(10)){
-				elite = true;
-				allStatsMultiplier = 1.3f;
-				
-				switch(rand.nextInt(3)){
-				case DEF : statMultipliers[DEF] = 1.3f; eliteType = "DEF"; break;
-				case DMG : statMultipliers[DMG] = 1.3f; eliteType = "DMG"; break;
-				case SPD : statMultipliers[SPD] = 1.3f; eliteType = "SPD"; break;
-				}
-			} else {
-				elite = false;
-				allStatsMultiplier = 1;
-				for(int i = 0; i < 10; i++){
-					statMultipliers[i] = 1;
-				}
-			}
-		}
-		
-		public boolean isFacingChar(){
-			if(c.getY()+c.getHeight() > getY()){
-				if((getXVelocity() > 0 && c.getX() > getX()) || (getXVelocity() < 0 && c.getX() < getX())) return true;
-			}
-			return false;
-		}
-		
-		public void jump(){
-			setYVelocity(-1);
-		}
-		
-		// change le point ou le monstre apparait
-		public void setSpawn(Point Spawn) {
-			spawnPoint = Spawn;
-		}
-		
-		public int getExp() {
-			return (int)(exp*allStatsMultiplier);
-		}
-		
-		// retourne la vie du monstre
-		public int getLife() {
-			return life;
-		}
-
-		public int getMaxLife() {
-			return (int)(maxLife * allStatsMultiplier * statMultipliers[DEF]);
-		}
-
-		public int getLevel() {
-			if(elite) return lvl + 2;
-			return lvl;
-		}
-
-		// change les coordonées du monstre si elles sont à l'intérieur de la
-		// map
-		public void setX(float x) {
-			if ((x > 0 && x < getMapXLimit() - getWidth())
-					|| getMapXLimit() == -1)
-				super.setX(x);
-		}
-
-		public void setY(float y) {
-			if ((y > 0 && y < getMapYLimit() - getHeight())
-					|| getMapYLimit() == -1)
-				super.setY(y);
-		}
-
-		// modifie la position et la vitesse du monstre, le fais réapparaitre
-		public void update(long timePassed) {
-			if (alive) {
-				regen+= timePassed;
-				if(regen >= 40000/maxLife+200){
-					if(life < maxLife)
-					life++;
-					regen=0;
-				}
-				if (getXVelocity() == getSpeed() || getXVelocity() == -getSpeed())
-					if ((isFacingLeft() && getXVelocity() > 0)
-							|| (!(isFacingLeft()) && getXVelocity() < 0))
-						setXVelocity(-getXVelocity());
-				super.update(timePassed);
-				if (cantMoveTime >= 0) {
-					cantMoveTime -= timePassed;
-				}
-				if (cantMoveTime <= 0)
-					canMove = true;
-				
-				if(isAggro){
-				if(aggroTimer>=0){
-					aggroTimer-=timePassed;
-				}
-				if(aggroTimer<=0) isAggro = false;
-				}
-				
-			} else {
-				deathTimer -= timePassed;
-				if (deathTimer <= 0) {
-					init();
-				}
-			}
-
-		}
-
-		// retourne si le monstre est en vie
-		public boolean isAlive() {
-			return alive;
-		}
-
-		// retourne si le monstre peut bouger
-		public boolean canMove() {
-			return canMove;
-		}
-
-		// endommage le monstre et le fait reculer
-		public void damage(int dmg, float speed) {
-			
-			boolean crit = false;
-			Random rand = new Random();
-			if ((rand.nextInt(100) + 1) < c.getCritChance()) {
-				dmg = dmg * (c.getCritDamage() + 100) / 100;
-				crit = true;
-			}
-
-			if (dmg > 0) {
-				life -= dmg;
-				isAggro = true; aggroTimer = 5000;
-			if (life <= 0)
-				die();
-			else if(hitSound != null) hitSound.start();
-			}
-			boolean hit = false;
-
-			for (int j = 0; j < damage.length && hit == false; j++) {
-				if (damage[j] == null)
-					damage[j] = new FlyingText();
-				if (!damage[j].isActive()) {
-					damage[j] = new FlyingText(dmg, this,crit);
-					hit = true;
-				}
-			}
-			
-			if(dmg > maxLife / 50 && canMove){
-			canMove = false;
-			cantMoveTime = (long) (105 + speed * 1100);
-			setYVelocity(-(speed * 3));
-			if ((c.getX() + c.getWidth() / 2) > (getX() + getWidth() / 2))
-				speed = -speed;
-			setXVelocity(speed);
-			}
-		}
-
-		// fais mourir le monstre
-		private void die() {
-			if(dieSound != null) dieSound.start();
-			alive = false; isAggro = false;
-			deathTimer = timer;
-			if(lvl >= c.stats.lvl-5)
-			c.exp(exp);
-			for (int i = 0; i < getdropamount(); i++)
-				drop();
-		}
-
-		private void drop() {
-
-			Random rand = new Random();
-			int rarity = rand.nextInt(100);
-
-			if ((rand.nextInt(100)) < getdropchance()) {
-
-				if (rarity < getrarechance())
-					rarity = Item.RARE;
-				else if (rarity < (int)(getrarechance() * 4.5))
-					rarity = Item.MAGIC;
-				else
-					rarity = Item.COMMON;
-
-				int itemChoices = 8;
-				if (rarity == Item.COMMON)
-					itemChoices = 6;
-				
-				int dropLvl = rand.nextInt(10);
-				if(dropLvl <= 3) dropLvl = getLevel(); else if(dropLvl <= 5) dropLvl = getLevel()+1; else dropLvl = getLevel()-1;
-				
-				if(dropLvl < 1)dropLvl = 1;
-				
-				add(new Drop(new Item(dropLvl, rand.nextInt(itemChoices), rarity),
-						new Point(getX() + rand.nextInt(getWidth() >= 50 ? getWidth() - 50 : 1),
-								getY() + getHeight() - 50)));
-			}
-		}
-		
-		private int getdropamount(){
-			if(elite) return dropamount+1;
-			return dropamount;
-		}
-		
-		private int getdropchance(){
-			return (int)(dropchance*allStatsMultiplier);
-		}
-		
-		private int getrarechance(){
-			return (int)(rarechance*allStatsMultiplier);
-		}
-
-		// load les animations du monstre
-		private void getAnimations(int i) {
-			hitLeft = new Animation();
-			hitRight = new Animation();
-			right = new Animation();
-			left = new Animation();
-			loadpics(i);
-			switch (i) {
-			case COBRA:
-			case BIGCOBRA:
-			case VERYBIGCOBRA:
-				right.addScene(monstreD[1], 220);
-				right.addScene(monstreD[2], 220);
-				left.addScene(monstreG[1], 220);
-				left.addScene(monstreG[2], 220);
-				hitLeft.addScene(monstreG[1], 200);
-				hitRight.addScene(monstreD[1],200);
-				break;
-			case COC:
-				right.addScene(monstreD[1],110);
-				right.addScene(monstreD[2],110);
-				right.addScene(monstreD[3],110);
-				right.addScene(monstreD[4],110);
-				left.addScene(monstreG[1],110);
-				left.addScene(monstreG[2],110);
-				left.addScene(monstreG[3],110);
-				left.addScene(monstreG[4],110);
-				hitLeft.addScene(monstreG[1], 200);
-				hitRight.addScene(monstreD[1],200);
-				break;
-			}
-		}
-
-		// retourne l'espace ou la prochaine platforme devrait être
-		public Rectangle getNextFloor() {
-			if (facingLeft)
-				return new Rectangle(getX() - 25, getY() + getHeight() - 5, 20,
-						15);
-			return new Rectangle(getX() + getWidth() + 5, getY() + getHeight()
-					- 5, 20, 15);
-		}
-
-		// retourne le coté du monstre
-		public Rectangle getSide() {
-			if (getXVelocity() < 0)
-				return new Rectangle(getX() - 10, getY() + 10, 20,
-						getHeight() - 25);
-			return new Rectangle(getX() + getWidth() - 10, getY() + 10, 20,
-					getHeight() - 25);
-		}
-
-		// load les images du monstre
-		public void loadpics(int i) {
-			switch (i) {
-			case COBRA:
-				monstreD[1] = newImage("/cobra1D.png");
-				monstreD[2] = newImage("/cobra2D.png");
-				monstreG[1] = newImage("/cobra1G.png");
-				monstreG[2] = newImage("/cobra2G.png");
-				break;
-			case BIGCOBRA:
-				monstreD[1] = newImage("/bigcobra1D.png");
-				monstreD[2] = newImage("/bigcobra2D.png");
-				monstreG[1] = newImage("/bigcobra1G.png");
-				monstreG[2] = newImage("/bigcobra2G.png");
-				break;
-			case VERYBIGCOBRA:
-				monstreD[1] = newImage("/verybigcobra1D.png");
-				monstreD[2] = newImage("/verybigcobra2D.png");
-				monstreG[1] = newImage("/verybigcobra1G.png");
-				monstreG[2] = newImage("/verybigcobra2G.png");
-				break;
-			case COC:
-				monstreD[1] = newImage("/coc1D.png");
-				monstreD[2] = newImage("/coc2D.png");
-				monstreD[3] = newImage("/coc3D.png");
-				monstreD[4] = newImage("/coc4D.png");
-				monstreG[1] = newImage("/coc1G.png");
-				monstreG[2] = newImage("/coc2G.png");
-				monstreG[3] = newImage("/coc3G.png");
-				monstreG[4] = newImage("/coc4G.png");
-				break;
-			}
-		}
-
-		// retourne l'animation du monstre
-		public Animation getAnimation(boolean left) {
-			if (left){
-				if(!canMove) return hitLeft;
-				return this.left;
-			}
-			else{
-				if(!canMove) return hitRight;
-				return right;
-			}
-		}
-
-		// retourne si le monstre "regarde" a gauche
-		public boolean isFacingLeft() {
-			return facingLeft;
-		}
-
-		public void setFacingLeft(boolean facingLeft) {
-			this.facingLeft = facingLeft;
-		}
-
-		// retourne toute la surface du monstre
-		public Rectangle getArea() {
-			return new Rectangle(getX(), getY(), getWidth(), getHeight());
-		}
-
-		// retourne la défence du monstre
-		public int getDefense() {
-			return (int)(def * statMultipliers[DEF] * allStatsMultiplier);
-		}
-
-		// frappe un personnage
-		public synchronized int hit(Character c) {
-			int dmg = getDamage(c);
-
-			if (!c.isInvincible()) {
-				c.damageChar(dmg);
-				if (dmg >= (c.getMaxLife() * 5 / 100)) {
-					float vx = 0.3f;
-					if ((getX() + getWidth() / 2) > (c.getX() + c.getWidth() / 2))
-						vx = -vx;
-					c.setXVelocity(vx);
-					c.setYVelocity(-0.5f);
-					c.canMove(false);
-				}
-				c.setInvincible(1000);
-			}
-			return dmg;
-		}
-
-		// retourne les dégats si le monstre frappe un personnage
-		public int getDamage(Character c) {
-			Random rand = new Random();
-			int dmast = rand.nextInt(100 - getMastery()) + getMastery();
-
-			int dmg = getAtk();
-			dmg = dmg * dmast / 100;
-			dmg = (int) (dmg * (1 - c.getDefense()
-					/ (c.getDefense() + 22 * Math.pow(1.1, getLevel()))));
-			if (dmg <= 0)
-				dmg = 1;
-			return dmg;
-		}
-
-		private int getAtk(){
-			return (int)(atk * allStatsMultiplier * statMultipliers[DMG]);
-		}
-		
-		private int getMastery(){
-			int mast = (int)(mastery * allStatsMultiplier * statMultipliers[DMG]);
-			if(mast >= 100) return 99;
-			return mast;
-		}
-
-		// fais tomber le monstre
-		public void fall(long timePassed) {
-			if (getYVelocity() < 0.8f)
-				setYVelocity(getYVelocity() + 0.005f * timePassed);
-		}
-
-		// retourne la vitesse de base du monstre
-		public float getSpeed() {
-			return spd*allStatsMultiplier*statMultipliers[SPD];
-		}
-
-		// retourne la base du monstre
-		public Rectangle getBase() {
-			return new Rectangle(getX() + 10, getY() + getHeight() - 15,
-					getWidth() - 20, 20);
-		}
-
-	}
+	
 
 	public class Drop {
 
@@ -3343,213 +2950,6 @@ public class Main extends Core implements KeyListener, MouseListener,
 		}
 	}
 
-	public class Map {
-
-		private Spot[] spots = new Spot[5];
-		private int Xlimit, Ylimit;
-		private Wall[] walls = new Wall[25];
-		private Platform[] platforms = new Platform[25];
-		private Monster[] monsters = new Monster[25];
-		private Image background;
-		private Ladder[] ladders = new Ladder[25];
-		private Rectangle[] water = new Rectangle[5];
-		public Point spawnPoint = new Point(50,50), spawnCamera = new Point(0,0);
-
-		public Map(int number) {
-			switch (number) {
-			case 0:
-				spawnPoint = new Point(5,715-200);
-				Xlimit = 1500;
-				Ylimit = 910;
-				walls[4] = new Wall(0,715,1500,10);
-				walls[5] = new Wall(1195,615,305,295);
-				walls[6] = new Wall(1363,525,137,380);
-				platforms[0] = new Platform(490,530,170);
-				background = newImage("/map0.jpg");
-				spots[0] = new Spot(new Point(1390,320), new Point(5,335), 1, new Point(0,0));
-				monsters[0] = new Monster(COBRA, new Point(100,715-60));
-				monsters[1] = new Monster(COBRA, new Point(900,715-60));
-				monsters[2] = new Monster(COBRA, new Point(570,525-60));
-				monsters[3] = new Monster(COBRA, new Point(1230,600-60));
-				break;
-			case 1:
-				spawnPoint = new Point(5,335);
-				Xlimit = 3000;
-				Ylimit = 1820;
-				walls[4] = new Wall(0,Ylimit-40,Xlimit,40);
-				platforms[0] = new Platform(0,550, 515);
-				platforms[1] = new Platform(780,550,1330-780);
-				platforms[2] = new Platform(1600,550,2190-1600);
-				platforms[3] = new Platform(2450,550,Xlimit-2450);
-				platforms[4] = new Platform(515,1455,775-515);
-				ladders[0] = new Ladder(0,platforms[0],460,1260);
-				spots[0] = new Spot(new Point(0,340), new Point(1500-125,525-200), 0, new Point(220,0));
-				spots[1] = new Spot(new Point(2450+450,550-200), new Point(5,5000-240),2,new Point(0,5000-910));
-				background = newImage("/map1.jpg");
-				monsters[0] = new Monster(COBRA, new Point(850,540-60));
-				monsters[1] = new Monster(COBRA, new Point(1100,540-60));
-				monsters[2] = new Monster(BIGCOBRA, new Point(1750,540-60));
-				monsters[3] = new Monster(COBRA, new Point(2000,540-60));
-				monsters[4] = new Monster(BIGCOBRA, new Point(2600,Ylimit-100));
-				monsters[5] = new Monster(BIGCOBRA, new Point(1600,Ylimit-100));
-				monsters[6] = new Monster(BIGCOBRA, new Point(400,Ylimit-100));
-				monsters[7] = new Monster(VERYBIGCOBRA, new Point(1800,Ylimit-100));
-				monsters[8] = new Monster(VERYBIGCOBRA, new Point(600,Ylimit-100));
-				break;
-			case 2:
-				Xlimit = 2000;
-				Ylimit = 5000;
-				
-				spawnPoint = new Point(5,5000-240);
-				spawnCamera = new Point(0,5000-910);
-				
-				spots[0] = new Spot(new Point(0,5000-240), new Point(2450+430,550-200), 1, new Point(3000-1280,0));
-				walls[4] = new Wall(0,Ylimit-40,Xlimit,40);
-				walls[5] = new Wall(1580,4012,2000-1580,4035-4012);
-				walls[6] = new Wall(103,2483,201-103,2658-2483);
-				walls[7] = new Wall(215,2568,253-215,2656-2568);
-				walls[8] = new Wall(400,2357,605-400,2812-2380);
-				platforms[0] = new Platform(765,4835, 1052-765);
-				platforms[1] = new Platform(927,4075, 1167-927);
-				platforms[2] = new Platform(765,3785, 1345-765);
-				platforms[3] = new Platform(1465,3700, 1660-1465);
-				platforms[4] = new Platform(1782,3700, 2000-1782);
-				platforms[5] = new Platform(765,3785, 1345-765);
-				platforms[6] = new Platform(790,3313, 1289-777);
-				platforms[7] = new Platform(277,3315, 668-277);
-				platforms[8] = new Platform(256,2633, 668-277);
-				platforms[9] = new Platform(220,2353, 180);
-				platforms[10] = new Platform(1150,2436, 1333-1150);
-				
-				monsters[0] = new Monster(VERYBIGCOBRA, new Point(600,Ylimit-100));
-				monsters[7] = new Monster(BIGCOBRA, new Point(1000,Ylimit-100));
-				monsters[8] = new Monster(COBRA, new Point(1200,Ylimit-100));
-				monsters[9] = new Monster(COBRA, new Point(1400,Ylimit-100));
-				monsters[1] = new Monster(COC, new Point(800,3730));
-				monsters[2] = new Monster(COC, new Point(800, 3250));
-				monsters[3] = new Monster(VERYBIGCOBRA, new Point(300, 3250));
-				monsters[4] = new Monster(BIGCOBRA, new Point(550, 3250));
-				monsters[5] = new Monster(COC, new Point(400, 2290));
-				
-				background = newImage("/map2.jpg");
-				ladders[0] = new Ladder(987,platforms[1],100,4415-4020);
-				ladders[1] = new Ladder(945,4120,125,540);
-				ladders[2] = new Ladder(1200,platforms[2],1337-1220,4100-3870);
-				ladders[3] = new Ladder(1825,platforms[3],0,4012-3860);
-				ladders[4] = new Ladder(815,platforms[6],971-815,3773-3341);
-				ladders[5] = new Ladder(502,2817,0,3185-2830);
-				ladders[6] = new Ladder(337,platforms[8],0,2800-2600);
-				ladders[7] = new Ladder(804,2350,1110-804,2600-2350);
-				spots[1] = new Spot(new Point(Xlimit-115,4009-200), new Point(25,830-200),3, new Point(0,0));
-				break;
-			case 3:
-				
-				spawnPoint = new Point(5,Ylimit-265);
-				spawnCamera = new Point(0,0);
-				Xlimit = 3000;
-				Ylimit = 910;
-				spots[0] = new Spot(new Point(25,Ylimit-260), new Point(2000-125,4009-200), 2, new Point(2000-1280,3985-710));
-				spots[1] = new Spot(new Point(2880,630), new Point(25,700), 4, new Point(0,1000-910));
-				platforms[0] = new Platform(880,343,1185-880);
-				platforms[1] = new Platform(1297,393,1650-1297);
-				platforms[2] = new Platform(1757,335,1893-1757);
-				platforms[3] = new Platform(1975,407,50);
-				ladders[0] = new Ladder(941,351,1050-941,825-291);
-				ladders[1] = new Ladder(2580,430,5,833-430);
-				
-				monsters[0] = new Monster(COC, new Point(400,Ylimit-120));
-				monsters[1] = new Monster(COC, new Point(600,Ylimit-120));
-				monsters[2] = new Monster(COC, new Point(800,Ylimit-120));
-				monsters[3] = new Monster(COC, new Point(1000,Ylimit-120));
-				monsters[4] = new Monster(COC, new Point(1200,Ylimit-120));
-				monsters[5] = new Monster(COC, new Point(1400,Ylimit-120));
-				monsters[6] = new Monster(COC, new Point(1600,Ylimit-120));
-				monsters[7] = new Monster(COC, new Point(1800,Ylimit-120));
-				
-				background = newImage("/map3.jpg");
-				walls[4] = new Wall(0,Ylimit-60,Xlimit,40);
-				walls[5] = new Wall(2100,440,2571-2100,819-440);
-				break;
-			case 4:
-				spawnPoint = new Point(5,Ylimit-235);
-				spawnCamera = new Point(0,0);
-				Xlimit = 4000;
-				Ylimit = 1000;
-				background = newImage("/map4.png");
-				walls[4] = new Wall(0,Ylimit-30,Xlimit,40);
-				spots[0] = new Spot(new Point(25,Ylimit-230), new Point(2880,630), 3, new Point(3000-1280,0));
-				
-			}
-			limitWalls();
-		}
-
-		public Ladder[] getLadders() {
-			return ladders;
-		}
-		
-		public Rectangle[] getWater() {
-			return water;
-		}
-
-		// quatre murs limites
-		public void limitWalls() {
-			walls[0] = new Wall(-5, 0, 10, Ylimit);
-			walls[1] = new Wall(Xlimit - 5, 0, 10, Ylimit);
-			walls[2] = new Wall(0, Ylimit - 5, Xlimit, 10);
-			walls[3] = new Wall(0, -5, Xlimit, 10);
-		}
-		
-		public Image getBackground(){return background;}
-		
-		// retourne les murs et les platformes de la map
-		public Wall[] getWalls() {
-			return walls;
-		}
-
-		public Platform[] getPlatforms() {
-			return platforms;
-		}
-
-		// retourne un spot de téléportation
-		public Rectangle getSpot(int i) {
-			return spots[i].getArea();
-		}
-
-		// retourne tous les spots de téléportation
-		public Spot[] getSpots() {
-			return spots;
-		}
-
-		// retourne la prochaine map
-		public int getNextMap(int i) {
-			return spots[i].getNextMap();
-		}
-
-		// returns the character's starting spot on the map
-		public Point getStart(int i) {
-			return spots[i].getSpawn();
-		}
-
-		// retourne les limites de la map
-		public int getXLimit() {
-			return Xlimit;
-		}
-
-		public int getYLimit() {
-			return Ylimit + 50;
-		}
-
-		// retourne ou la caméra devrait être à la prochaine map
-		public Point getXY(int i) {
-			return spots[i].getNextXY();
-		}
-
-		// retourne les monstres de la map
-		public Monster[] getMonsters() {
-			return monsters;
-		}
-
-	}
 
 	public class StatMenu {
 
