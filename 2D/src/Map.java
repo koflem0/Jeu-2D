@@ -137,7 +137,7 @@ import javax.swing.ImageIcon;
 				spawnCamera = new Point(0,0);
 				Xlimit = 4000;
 				Ylimit = 1000;
-				background = newImage("/map4.png");
+				background = newImage("/map4.jpg");
 				walls.add(new Wall(0,Ylimit-30,Xlimit,40));
 				spots.add(new Spot(new Point(25,Ylimit-230), new Point(2880,630), 3, new Point(3000-1280,0)));
 				
